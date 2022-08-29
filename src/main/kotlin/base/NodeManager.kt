@@ -8,19 +8,25 @@ class NodeManager private constructor(
     fun find(pattern: String): String {
         val args = pattern.split(" ")
         if (args.isEmpty()) throw IllegalStateException("A pattern must be provided")
-        return internalFind(args)
+        val stack = Stack()
+        val node = internalFind(args, stack)
+        return node.response(stack)
     }
 
-    private fun internalFind(args: List<String>): String {
-        val node = nodes[args[0]] ?: nodes["*"] ?: throw IllegalStateException("A default response must be provided")
-        return findLastNode(node, args, 0).response()
+    private fun internalFind(args: List<String>, stack: Stack): Node {
+        val pattern = args[0]
+        val node = nodes[pattern] ?: nodes["*"] ?: throw IllegalStateException("A default response must be provided")
+        return findLastNode(node, args, stack, 0)
     }
 
-    private fun findLastNode(node: Node, args: List<String>, cursor: Int): Node {
+    private fun findLastNode(node: Node, args: List<String>, stack: Stack, cursor: Int): Node {
+        if (node.isWildCard) {
+            stack.template += args[cursor]
+        }
         if (cursor + 1 !in args.indices) return node
         val pattern = args[cursor + 1]
         val next = node.children[pattern] ?: node.children["*"] ?: return node
-        return findLastNode(next, args, cursor + 1)
+        return findLastNode(next, args, stack, cursor + 1)
     }
 
     companion object {
@@ -53,12 +59,12 @@ class NodeManager private constructor(
                 data.map(Aiml::categories).flatten().map {
                     val args = it.pattern.split(" ")
                     val pattern = args[0]
-                    val parent = nodes[pattern] ?: Node(
+                    val node = nodes[pattern] ?: Node(
                         pattern,
                         IncompleteResponse
                     )
-                    nodes[pattern] = parent
-                    val (actual, prev) = buildNodeTree(parent, null, args, 0)
+                    nodes[pattern] = node
+                    val (actual, prev) = buildNodeTree(node, null, args, 0)
                     if (prev == null) {
                         nodes[pattern] = actual.copy(
                             response = ConcreteResponse(it.template)

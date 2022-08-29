@@ -10,4 +10,7 @@ data class Node(
     operator fun set(index: String, node: Node) {
         children[index] = node
     }
+
+    val isWildCard: Boolean
+        get() = "*" == pattern
 }

@@ -1,5 +1,5 @@
 package base
 
 interface Response {
-    operator fun invoke(): String
+    operator fun invoke(stack: Stack): String
 }

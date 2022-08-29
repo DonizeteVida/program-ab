@@ -1,5 +1,5 @@
 package base
 
 object IncompleteResponse : Response {
-    override fun invoke() = throw IllegalStateException("Should never happen")
+    override fun invoke(stack: Stack) = throw IllegalStateException("Should never happen")
 }
