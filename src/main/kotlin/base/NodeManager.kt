@@ -1,6 +1,8 @@
 package base
 
-class NodeManager(
+import parser.json.Aiml
+
+class NodeManager private constructor(
     private val nodes: HashMap<String, Node> = hashMapOf()
 ) {
     fun find(pattern: String): String {
@@ -21,9 +23,55 @@ class NodeManager(
         return findLastNode(next, args, cursor + 1)
     }
 
-    operator fun get(index: String) = nodes[index]
+    companion object {
+        fun <T> build(builder: Builder<T>) = builder()
+    }
 
-    operator fun set(index: String, node: Node) {
-        nodes[index] = node
+    sealed interface Builder<T> : () -> NodeManager {
+        data class JsonBuilder(
+            val data: List<Aiml>
+        ) : Builder<List<Aiml>> {
+            private fun buildNodeTree(
+                actual: Node,
+                prev: Node?,
+                args: List<String>,
+                cursor: Int
+            ): Pair<Node, Node?> {
+                if (cursor + 1 !in args.indices) return actual to prev
+                val pattern = args[cursor + 1]
+                val next = actual[pattern] ?: Node(
+                    pattern,
+                    IncompleteResponse
+                )
+                actual[pattern] = next
+                return buildNodeTree(next, actual, args, cursor + 1)
+            }
+
+            override fun invoke(): NodeManager {
+                val nodes = hashMapOf<String, Node>()
+
+                data.map(Aiml::categories).flatten().map {
+                    val args = it.pattern.split(" ")
+                    val pattern = args[0]
+                    val parent = nodes[pattern] ?: Node(
+                        pattern,
+                        IncompleteResponse
+                    )
+                    nodes[pattern] = parent
+                    val (actual, prev) = buildNodeTree(parent, null, args, 0)
+                    if (prev == null) {
+                        nodes[pattern] = actual.copy(
+                            response = ConcreteResponse(it.template)
+                        )
+                    } else {
+                        prev[args.last()] = actual.copy(
+                            response = ConcreteResponse(it.template)
+                        )
+                    }
+                }
+
+                return NodeManager(nodes)
+            }
+        }
     }
 }
