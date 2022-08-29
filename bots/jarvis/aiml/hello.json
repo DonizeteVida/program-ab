@@ -1,0 +1,10 @@
+{
+  "description": "A description here",
+  "categories": [
+    {
+      "type": "default",
+      "pattern": "Olá",
+      "template": "Olá, tudo bem com você?"
+    }
+  ]
+}

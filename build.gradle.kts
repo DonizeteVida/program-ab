@@ -13,7 +13,7 @@ repositories {
 }
 
 dependencies {
-    implementation("com.fasterxml.jackson.dataformat:jackson-dataformat-xml:2.13.3")
+    implementation("com.google.code.gson:gson:2.9.1")
     testImplementation(kotlin("test"))
 }
 
