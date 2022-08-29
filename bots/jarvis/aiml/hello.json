@@ -23,8 +23,8 @@
     },
     {
       "type": "concrete",
-      "pattern": "O que é uma *",
-      "template": "Uma {{ star }} é uma {{ star }}"
+      "pattern": "Uma * é uma *",
+      "template": "Uma {{ star:0 }} não é uma {{ star:1 }}. Mas uma {{ star:1 }} pode ser uma {{ star:0 }}."
     },
     {
       "type": "concrete",
