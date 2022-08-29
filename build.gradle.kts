@@ -13,7 +13,7 @@ repositories {
 }
 
 dependencies {
-    implementation("org.simpleframework:simple-xml:2.7.1")
+    implementation("com.fasterxml.jackson.dataformat:jackson-dataformat-xml:2.13.3")
     testImplementation(kotlin("test"))
 }
 
