@@ -13,6 +13,7 @@ repositories {
 }
 
 dependencies {
+    implementation("org.simpleframework:simple-xml:2.7.1")
     testImplementation(kotlin("test"))
 }
 
