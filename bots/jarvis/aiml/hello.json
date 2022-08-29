@@ -2,9 +2,34 @@
   "description": "A description here",
   "categories": [
     {
-      "type": "default",
+      "type": "concrete",
       "pattern": "Olá",
       "template": "Olá, tudo bem com você?"
+    },
+    {
+      "type": "concrete",
+      "pattern": "*",
+      "template": "Me desculpe, eu não consigo te dar uma resposta"
+    },
+    {
+      "type": "concrete",
+      "pattern": "Bom dia",
+      "template": "Bom dia"
+    },
+    {
+      "type": "concrete",
+      "pattern": "Bom dia lindo",
+      "template": "Lindo é vc"
+    },
+    {
+      "type": "concrete",
+      "pattern": "O que é uma *",
+      "template": "Uma {{ star }} é uma {{ star }}"
+    },
+    {
+      "type": "concrete",
+      "pattern": "O que é uma casa",
+      "template": "Uma casa é uma casa"
     }
   ]
 }
