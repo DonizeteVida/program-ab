@@ -1,0 +1,10 @@
+<aiml>
+    <category>
+        <pattern>Hello World</pattern>
+        <template>Hello World to you too</template>
+    </category>
+    <category>
+        <pattern>Olá</pattern>
+        <template>Como você está?</template>
+    </category>
+</aiml>
