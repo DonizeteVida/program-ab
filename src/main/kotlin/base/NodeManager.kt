@@ -48,10 +48,10 @@ class NodeManager private constructor(
                 if (cursor + 1 !in args.indices) return actual to prev
                 val pattern = args[cursor + 1]
                 val next = actual[pattern] ?: Node(
-                    pattern,
-                    ""
-                )
-                actual[pattern] = next
+                    pattern
+                ).also {
+                    actual[pattern] = it
+                }
                 return buildNodeTree(next, actual, args, cursor + 1)
             }
 

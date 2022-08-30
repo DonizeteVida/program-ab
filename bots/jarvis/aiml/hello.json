@@ -28,6 +28,14 @@
     {
       "pattern": "O meu nome é *",
       "template": "Seu nome {{ nome={{ star:0 }} }} é lindo"
+    },
+    {
+      "pattern": "Qual é o meu nome",
+      "template": "O seu nome é {{ nome }}"
+    },
+    {
+      "pattern": "Qual é",
+      "template": "Qual foi"
     }
   ]
 }

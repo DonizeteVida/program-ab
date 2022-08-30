@@ -2,7 +2,7 @@ package base
 
 data class Node(
     val pattern: String,
-    val template: String,
+    val template: String = "",
     val children: HashMap<String, Node> = hashMapOf()
 ) {
     operator fun get(index: String) = children[index]
