@@ -2,19 +2,49 @@ package base.response
 
 import base.DynamicRegexPattern
 import base.Memory
+import base.NodeManager
 import base.Stack
 
-sealed interface Response : (String, Stack, Memory) -> String {
+sealed interface Response<T> : (String, Stack, Memory) -> T {
     companion object {
-        fun transform(template: String, stack: Stack, memory: Memory): String {
+        fun transform(
+            template: String,
+            stack: Stack,
+            memory: Memory,
+            nodeManager: NodeManager
+        ): String {
             val stargized = Star(template, stack, memory)
             val getized = Get(stargized, stack, memory)
             val assignized = Assign(getized, stack, memory)
-            return assignized
+            val (sraized, isSraized) = Srai(assignized, stack, memory)
+            if (isSraized) return nodeManager.find(sraized)
+            return sraized
         }
     }
 
-    object Get : Response {
+    object Srai : Response<Pair<String, Boolean>> {
+        override fun invoke(template: String, stack: Stack, memory: Memory): Pair<String, Boolean> {
+            val strBuilder = StringBuilder(template)
+            val regex = DynamicRegexPattern.SRAI.regex
+            val matches = regex.findAll(template).toList()
+            if (matches.isEmpty()) return template to false
+            val match = matches.single()
+
+            val all = match.groups[0] ?: return template to false
+            val value = match.groups[1]?.value ?: return template to false
+
+            strBuilder.replace(
+                all.range.first,
+                all.range.last + 1,
+                value
+            )
+
+            return strBuilder.toString() to true
+        }
+    }
+
+
+    object Get : Response<String> {
         override fun invoke(template: String, stack: Stack, memory: Memory): String {
             var offset = 0
             val strBuilder = StringBuilder(template)
@@ -41,7 +71,7 @@ sealed interface Response : (String, Stack, Memory) -> String {
         }
     }
 
-    object Assign : Response {
+    object Assign : Response<String> {
         override fun invoke(template: String, stack: Stack, memory: Memory): String {
             var offset = 0
             val strBuilder = StringBuilder(template)
@@ -70,7 +100,7 @@ sealed interface Response : (String, Stack, Memory) -> String {
         }
     }
 
-    object Star : Response {
+    object Star : Response<String> {
         override fun invoke(template: String, stack: Stack, memory: Memory): String {
             var offset = 0
             val strBuilder = StringBuilder(template)

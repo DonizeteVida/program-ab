@@ -12,7 +12,7 @@ class NodeManager private constructor(
         if (args.isEmpty()) throw IllegalStateException("A pattern must be provided")
         val stack = Stack()
         val node = internalFind(args, stack)
-        return Response.transform(node.template, stack, memory)
+        return Response.transform(node.template, stack, memory, this)
     }
 
     private fun internalFind(args: List<String>, stack: Stack): Node {

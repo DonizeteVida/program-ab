@@ -14,6 +14,10 @@
       "template": "Bom dia"
     },
     {
+      "pattern": "Bom",
+      "template": "{{ srai: Bom dia e lindo }}"
+    },
+    {
       "pattern": "Bom dia lindo",
       "template": "Lindo é vc"
     },
