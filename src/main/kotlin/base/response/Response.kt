@@ -1,6 +1,6 @@
 package base.response
 
-import base.DynamicRegexPattern
+import base.RegexPattern
 import base.Memory
 import base.NodeManager
 import base.Stack
@@ -14,7 +14,8 @@ sealed interface Response<T> : (String, Stack, Memory) -> T {
             nodeManager: NodeManager
         ): String {
             val stargized = Star(template, stack, memory)
-            val getized = Get(stargized, stack, memory)
+            val fallbackzed = GetFallback(stargized, stack, memory)
+            val getized = Get(fallbackzed, stack, memory)
             val assignized = Assign(getized, stack, memory)
             val (sraized, isSraized) = Srai(assignized, stack, memory)
             if (isSraized) return nodeManager.find(sraized)
@@ -25,7 +26,7 @@ sealed interface Response<T> : (String, Stack, Memory) -> T {
     object Srai : Response<Pair<String, Boolean>> {
         override fun invoke(template: String, stack: Stack, memory: Memory): Pair<String, Boolean> {
             val strBuilder = StringBuilder(template)
-            val regex = DynamicRegexPattern.SRAI.regex
+            val regex = RegexPattern.SRAI.regex
             val matches = regex.findAll(template).toList()
             if (matches.isEmpty()) return template to false
             val match = matches.single()
@@ -43,12 +44,39 @@ sealed interface Response<T> : (String, Stack, Memory) -> T {
         }
     }
 
+    object GetFallback : Response<String> {
+        override fun invoke(template: String, stack: Stack, memory: Memory): String {
+            var offset = 0
+            val strBuilder = StringBuilder(template)
+            val regex = RegexPattern.GET_FALLBACK.regex
+            val matches = regex.findAll(template)
+
+            for (match in matches) {
+                val all = match.groups[0] ?: continue
+                val size = all.range.last - all.range.first
+
+                val name = match.groups[1]?.value ?: continue
+                val fallback = match.groups[2]?.value ?: continue
+                val value = memory.variables[name] ?: fallback
+
+                strBuilder.replace(
+                    all.range.first + offset,
+                    all.range.last + offset + 1,
+                    value
+                )
+
+                offset += value.length - size - 1
+            }
+
+            return strBuilder.toString()
+        }
+    }
 
     object Get : Response<String> {
         override fun invoke(template: String, stack: Stack, memory: Memory): String {
             var offset = 0
             val strBuilder = StringBuilder(template)
-            val regex = DynamicRegexPattern.GET.regex
+            val regex = RegexPattern.GET.regex
             val matches = regex.findAll(template)
 
             for (match in matches) {
@@ -75,7 +103,7 @@ sealed interface Response<T> : (String, Stack, Memory) -> T {
         override fun invoke(template: String, stack: Stack, memory: Memory): String {
             var offset = 0
             val strBuilder = StringBuilder(template)
-            val regex = DynamicRegexPattern.ASSIGN.regex
+            val regex = RegexPattern.ASSIGN.regex
             val matches = regex.findAll(template)
 
             for (match in matches) {
@@ -104,7 +132,7 @@ sealed interface Response<T> : (String, Stack, Memory) -> T {
         override fun invoke(template: String, stack: Stack, memory: Memory): String {
             var offset = 0
             val strBuilder = StringBuilder(template)
-            val regex = DynamicRegexPattern.STAR.regex
+            val regex = RegexPattern.STAR.regex
             val matches = regex.findAll(template)
             for (match in matches) {
                 val all = match.groups[0] ?: continue
