@@ -11,23 +11,23 @@ class NodeManager private constructor(
         val args = pattern.split(" ")
         if (args.isEmpty()) throw IllegalStateException("A pattern must be provided")
         val stack = Stack()
-        val node = internalFind(args, stack)
-        return Response.transform(node.template, stack, memory, this)
+        val node = internalFind(args, stack) ?: return "Logic not implemented yet"
+        return Response.transform(node, stack, memory, this)
     }
 
-    private fun internalFind(args: List<String>, stack: Stack): Node {
+    private fun internalFind(args: List<String>, stack: Stack): Node? {
         val pattern = args[0]
         val node = nodes[pattern] ?: nodes["*"] ?: throw IllegalStateException("A default response must be provided")
         return findLastNode(node, args, stack, 0)
     }
 
-    private fun findLastNode(node: Node, args: List<String>, stack: Stack, cursor: Int): Node {
+    private fun findLastNode(node: Node, args: List<String>, stack: Stack, cursor: Int): Node? {
         if (node.isWildCard) {
             stack.template += args[cursor]
         }
         if (cursor + 1 !in args.indices) return node
         val pattern = args[cursor + 1]
-        val next = node.children[pattern] ?: node.children["*"] ?: return node
+        val next = node.children[pattern] ?: node.children["*"] ?: return null
         return findLastNode(next, args, stack, cursor + 1)
     }
 
@@ -43,42 +43,50 @@ class NodeManager private constructor(
                 actual: Node,
                 prev: Node?,
                 args: List<String>,
+                indices: IntRange,
                 cursor: Int
             ): Pair<Node, Node?> {
-                if (cursor + 1 !in args.indices) return actual to prev
+                if (cursor + 1 !in indices) return actual to prev
                 val pattern = args[cursor + 1]
                 val next = actual[pattern] ?: Node(
                     pattern
                 ).also {
                     actual[pattern] = it
                 }
-                return buildNodeTree(next, actual, args, cursor + 1)
+                return buildNodeTree(next, actual, args, indices, cursor + 1)
             }
 
             override fun invoke(): NodeManager {
                 val nodes = hashMapOf<String, Node>()
+                val memory = Memory()
+
+                data.map(Aiml::variables).forEach {
+                    it.forEach { (key, value) ->
+                        memory.variables[key] = value
+                    }
+                }
 
                 data.map(Aiml::categories).flatten().map {
                     val args = it.pattern.split(" ")
                     val pattern = args[0]
                     val node = nodes[pattern] ?: Node(
-                        pattern,
-                        ""
+                        pattern
+                    ).also { node ->
+                        nodes[pattern] = node
+                    }
+                    val (actual, prev) = buildNodeTree(node, null, args, args.indices, 0)
+                    val finally = actual.copy(
+                        template = it.template,
+                        commands = it.commands ?: emptyList()
                     )
-                    nodes[pattern] = node
-                    val (actual, prev) = buildNodeTree(node, null, args, 0)
                     if (prev == null) {
-                        nodes[pattern] = actual.copy(
-                            template = it.template
-                        )
+                        nodes[pattern] = finally
                     } else {
-                        prev[args.last()] = actual.copy(
-                            template = it.template
-                        )
+                        prev[finally.pattern] = finally
                     }
                 }
 
-                return NodeManager(nodes)
+                return NodeManager(nodes, memory)
             }
         }
     }

@@ -1,23 +1,26 @@
 package base.response
 
-import base.RegexPattern
-import base.Memory
-import base.NodeManager
-import base.Stack
+import base.*
 
 sealed interface Response<T> : (String, Stack, Memory) -> T {
     companion object {
         fun transform(
-            template: String,
+            node: Node,
             stack: Stack,
             memory: Memory,
             nodeManager: NodeManager
         ): String {
-            val stargized = Star(template, stack, memory)
+            node.commands.forEach {
+                val stargized = Star(it, stack, memory)
+                val fallbackzed = GetFallback(stargized, stack, memory)
+                val getized = Get(fallbackzed, stack, memory)
+                Assign(getized, stack, memory)
+            }
+
+            val stargized = Star(node.template, stack, memory)
             val fallbackzed = GetFallback(stargized, stack, memory)
             val getized = Get(fallbackzed, stack, memory)
-            val assignized = Assign(getized, stack, memory)
-            val (sraized, isSraized) = Srai(assignized, stack, memory)
+            val (sraized, isSraized) = Srai(getized, stack, memory)
             if (isSraized) return nodeManager.find(sraized)
             return sraized
         }
@@ -57,7 +60,7 @@ sealed interface Response<T> : (String, Stack, Memory) -> T {
 
                 val name = match.groups[1]?.value ?: continue
                 val fallback = match.groups[2]?.value ?: continue
-                val value = memory.variables[name] ?: fallback
+                val value = memory.variables[name] ?: memory.variables[fallback]!!
 
                 strBuilder.replace(
                     all.range.first + offset,
@@ -99,32 +102,17 @@ sealed interface Response<T> : (String, Stack, Memory) -> T {
         }
     }
 
-    object Assign : Response<String> {
-        override fun invoke(template: String, stack: Stack, memory: Memory): String {
-            var offset = 0
-            val strBuilder = StringBuilder(template)
+    object Assign : Response<Unit> {
+        override fun invoke(template: String, stack: Stack, memory: Memory) {
             val regex = RegexPattern.ASSIGN.regex
             val matches = regex.findAll(template)
 
             for (match in matches) {
-                val all = match.groups[0] ?: continue
-                val size = all.range.last - all.range.first
-
                 val name = match.groups[1]?.value ?: continue
                 val value = match.groups[2]?.value ?: continue
 
                 memory.variables[name] = value
-
-                strBuilder.replace(
-                    all.range.first + offset,
-                    all.range.last + offset + 1,
-                    value
-                )
-
-                offset += value.length - size - 1
             }
-
-            return strBuilder.toString()
         }
     }
 

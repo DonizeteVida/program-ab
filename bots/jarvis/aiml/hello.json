@@ -1,5 +1,9 @@
 {
   "description": "A description here",
+  "incompletePattern": "Desculpe, não consigo te dar uma resposta",
+  "variables": {
+    "unknown": "desconhecido"
+  },
   "categories": [
     {
       "pattern": "Olá",
@@ -15,7 +19,7 @@
     },
     {
       "pattern": "Bom",
-      "template": "{{ srai: Bom dia e lindo }}"
+      "template": "{{ srai: 'Bom dia lindo' }}"
     },
     {
       "pattern": "Bom dia lindo",
@@ -30,12 +34,19 @@
       "template": "Uma casa é uma casa"
     },
     {
+      "pattern": "Meu nome é *",
+      "template": "{{ srai: 'O meu nome é {{ star:0 }}'}}"
+    },
+    {
       "pattern": "O meu nome é *",
-      "template": "Seu nome {{ nome={{ star:0 }} }} é lindo"
+      "template": "Seu nome é bonito, {{ star:0 }}",
+      "commands": [
+        "{{ nome={{ star:0 }} }}"
+      ]
     },
     {
       "pattern": "Qual é o meu nome",
-      "template": "O seu nome é {{ nome ?: desconhecido }}"
+      "template": "O seu nome é {{ nome ?: unknown }}"
     },
     {
       "pattern": "Qual é",
