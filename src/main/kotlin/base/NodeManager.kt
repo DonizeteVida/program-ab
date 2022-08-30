@@ -1,16 +1,18 @@
 package base
 
+import base.response.Response
 import parser.json.Aiml
 
 class NodeManager private constructor(
-    private val nodes: HashMap<String, Node> = hashMapOf()
+    private val nodes: HashMap<String, Node> = hashMapOf(),
+    private val memory: Memory = Memory()
 ) {
     fun find(pattern: String): String {
         val args = pattern.split(" ")
         if (args.isEmpty()) throw IllegalStateException("A pattern must be provided")
         val stack = Stack()
         val node = internalFind(args, stack)
-        return node.response(stack)
+        return Response.transform(node.template, stack, memory)
     }
 
     private fun internalFind(args: List<String>, stack: Stack): Node {
@@ -47,7 +49,7 @@ class NodeManager private constructor(
                 val pattern = args[cursor + 1]
                 val next = actual[pattern] ?: Node(
                     pattern,
-                    IncompleteResponse
+                    ""
                 )
                 actual[pattern] = next
                 return buildNodeTree(next, actual, args, cursor + 1)
@@ -61,17 +63,17 @@ class NodeManager private constructor(
                     val pattern = args[0]
                     val node = nodes[pattern] ?: Node(
                         pattern,
-                        IncompleteResponse
+                        ""
                     )
                     nodes[pattern] = node
                     val (actual, prev) = buildNodeTree(node, null, args, 0)
                     if (prev == null) {
                         nodes[pattern] = actual.copy(
-                            response = ConcreteResponse(it.template)
+                            template = it.template
                         )
                     } else {
                         prev[args.last()] = actual.copy(
-                            response = ConcreteResponse(it.template)
+                            template = it.template
                         )
                     }
                 }
