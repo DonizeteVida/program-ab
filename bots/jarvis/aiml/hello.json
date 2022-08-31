@@ -18,8 +18,8 @@
       "template": "Bom dia"
     },
     {
-      "pattern": "Bom",
-      "template": "{{ srai: 'Bom dia lindo' }}"
+      "pattern": "Bom *",
+      "template": "{{ srai: Bom dia lindo }}"
     },
     {
       "pattern": "Bom dia lindo",
