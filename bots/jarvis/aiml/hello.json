@@ -55,6 +55,14 @@
     {
       "pattern": "O {{ set:cars }} é muito bonito",
       "template": "Sim, o {{ pattern:0 }} é muito bonito mesmo"
+    },
+    {
+      "pattern": "Eu gosto muito de * e também de *",
+      "template": "Eu também gosto muito de {{ star:0 }} e de {{ star:1 }}"
+    },
+    {
+      "pattern": "* mas * ou melhor *",
+      "template": "{{ star:0 }} ou {{ star:1 }} ou {{ star:2 }}"
     }
   ]
 }

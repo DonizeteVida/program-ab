@@ -7,6 +7,7 @@ abstract class RegexStringPostProcessor(
 ) : StringPostProcessor {
     override fun invoke(builder: StringBuilder): StringPostProcessor.Result {
         val matches = regexPattern.findAll(builder)
+        val count = matches.count()
         for (m in matches) {
             val match = m.groups[0] ?: continue
             val range = match.range
@@ -17,7 +18,7 @@ abstract class RegexStringPostProcessor(
                 result
             )
         }
-        return onFinish(builder, matches.count())
+        return onFinish(builder, count)
     }
 
     abstract fun onMatch(matchResult: MatchResult): String

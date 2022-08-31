@@ -27,11 +27,33 @@ class NodeManager private constructor(
     }
 
     private fun findLastNode(node: Node, args: List<String>, stack: Stack, indices: IntRange, cursor: Int): Node? {
+        val hasNextArg = cursor + 1 in indices
         if (node.isWildCard) {
-            stack.star += args[cursor]
+            if (!hasNextArg) {
+                stack.star += args[cursor]
+                stack.pattern += args[cursor]
+            } else {
+                var allowCardCursor = cursor
+                val matches = arrayListOf<String>()
+                var lookahead: Node? = node.children[args[allowCardCursor]]
+                while (lookahead == null) {
+                    matches += args[allowCardCursor]
+                    if (allowCardCursor + 1 !in indices) break
+                    lookahead = node.children[args[++allowCardCursor]]
+                }
+                val arg = matches.joinToString(" ")
+                stack.star += arg
+                stack.pattern += arg
+                return if (lookahead == null) {
+                    node
+                } else {
+                    findLastNode(lookahead, args, stack, indices, allowCardCursor)
+                }
+            }
+        } else {
+            stack.pattern += args[cursor]
         }
-        stack.pattern += args[cursor]
-        if (cursor + 1 !in indices) return node
+        if (!hasNextArg) return node
         val pattern = args[cursor + 1]
         val next = node.children[pattern] ?: node.children["*"] ?: return null
         return findLastNode(next, args, stack, indices, cursor + 1)
