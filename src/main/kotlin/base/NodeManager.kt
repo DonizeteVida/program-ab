@@ -1,6 +1,6 @@
 package base
 
-import base.transformation.StringPostProcessor
+import base.postprocessor.StringPostProcessor
 import parser.json.Aiml
 
 class NodeManager private constructor(
@@ -28,7 +28,7 @@ class NodeManager private constructor(
 
     private fun findLastNode(node: Node, args: List<String>, stack: Stack, indices: IntRange, cursor: Int): Node? {
         if (node.isWildCard) {
-            stack.template += args[cursor]
+            stack.star += args[cursor]
         }
         stack.pattern += args[cursor]
         if (cursor + 1 !in indices) return node

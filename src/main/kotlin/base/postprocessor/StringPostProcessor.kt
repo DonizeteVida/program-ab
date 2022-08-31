@@ -1,4 +1,4 @@
-package base.transformation
+package base.postprocessor
 
 interface StringPostProcessor {
     sealed interface Result {
