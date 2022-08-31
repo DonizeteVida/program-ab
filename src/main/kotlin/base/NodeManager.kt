@@ -1,18 +1,22 @@
 package base
 
-import base.response.Response
+import base.transformation.StringPostProcessor
 import parser.json.Aiml
 
 class NodeManager private constructor(
     private val nodes: HashMap<String, Node> = hashMapOf(),
-    private val memory: Memory = Memory()
+    private val transformManager: TransformManager
 ) {
     fun find(pattern: String): String {
         val args = pattern.split(" ")
         if (args.isEmpty()) throw IllegalStateException("A pattern must be provided")
         val stack = Stack()
         val node = internalFind(args, stack) ?: return "Logic not implemented yet"
-        return Response.transform(node, stack, memory, this)
+        return when (val result = transformManager.transform(node, stack)) {
+            is StringPostProcessor.Result.Finish -> result.string
+            is StringPostProcessor.Result.Rerun -> find(result.string)
+            is StringPostProcessor.Result.Success -> throw IllegalStateException("Success result should be handled internally")
+        }
     }
 
     private fun internalFind(args: List<String>, stack: Stack): Node? {
@@ -58,13 +62,10 @@ class NodeManager private constructor(
                 return buildNodeTree(next, actual, args, indices, cursor + 1)
             }
 
-            private fun expandCategory() {
-
-            }
-
             override fun invoke(): NodeManager {
                 val nodes = hashMapOf<String, Node>()
                 val memory = Memory()
+                val transformManager = TransformManager(memory)
 
                 data.map(Aiml::variables).forEach {
                     it.forEach { (key, value) ->
@@ -92,7 +93,7 @@ class NodeManager private constructor(
                     }
                 }
 
-                return NodeManager(nodes, memory)
+                return NodeManager(nodes, transformManager)
             }
         }
     }

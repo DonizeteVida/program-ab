@@ -35,7 +35,7 @@
     },
     {
       "pattern": "Meu nome é *",
-      "template": "{{ srai: 'O meu nome é {{ star:0 }}'}}"
+      "template": "{{ srai: O meu nome é {{ star:0 }}}}"
     },
     {
       "pattern": "O meu nome é *",
