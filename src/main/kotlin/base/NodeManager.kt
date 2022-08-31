@@ -17,18 +17,20 @@ class NodeManager private constructor(
 
     private fun internalFind(args: List<String>, stack: Stack): Node? {
         val pattern = args[0]
+        val indices = args.indices
         val node = nodes[pattern] ?: nodes["*"] ?: throw IllegalStateException("A default response must be provided")
-        return findLastNode(node, args, stack, 0)
+        return findLastNode(node, args, stack, indices, 0)
     }
 
-    private fun findLastNode(node: Node, args: List<String>, stack: Stack, cursor: Int): Node? {
+    private fun findLastNode(node: Node, args: List<String>, stack: Stack, indices: IntRange, cursor: Int): Node? {
         if (node.isWildCard) {
             stack.template += args[cursor]
         }
-        if (cursor + 1 !in args.indices) return node
+        stack.pattern += args[cursor]
+        if (cursor + 1 !in indices) return node
         val pattern = args[cursor + 1]
         val next = node.children[pattern] ?: node.children["*"] ?: return null
-        return findLastNode(next, args, stack, cursor + 1)
+        return findLastNode(next, args, stack, indices, cursor + 1)
     }
 
     companion object {
@@ -54,6 +56,10 @@ class NodeManager private constructor(
                     actual[pattern] = it
                 }
                 return buildNodeTree(next, actual, args, indices, cursor + 1)
+            }
+
+            private fun expandCategory() {
+
             }
 
             override fun invoke(): NodeManager {

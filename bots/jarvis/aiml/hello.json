@@ -51,6 +51,10 @@
     {
       "pattern": "Qual é",
       "template": "Qual foi"
+    },
+    {
+      "pattern": "O {{ set:cars }} é muito bonito",
+      "template": "Sim, o {{ pattern:0 }} é muito bonito mesmo"
     }
   ]
 }

@@ -18,7 +18,8 @@ sealed interface Response<T> : (String, Stack, Memory) -> T {
             }
 
             val stargized = Star(node.template, stack, memory)
-            val fallbackzed = GetFallback(stargized, stack, memory)
+            val patternized = Pattern(stargized, stack, memory)
+            val fallbackzed = GetFallback(patternized, stack, memory)
             val getized = Get(fallbackzed, stack, memory)
             val (sraized, isSraized) = Srai(getized, stack, memory)
             if (isSraized) return nodeManager.find(sraized)
@@ -130,6 +131,33 @@ sealed interface Response<T> : (String, Stack, Memory) -> T {
                 val index = value.toInt()
 
                 val replace = stack.template[index]
+
+                strBuilder.replace(
+                    all.range.first + offset,
+                    all.range.last + offset + 1,
+                    replace
+                )
+
+                offset += replace.length - size - 1
+            }
+            return strBuilder.toString()
+        }
+    }
+
+    object Pattern : Response<String> {
+        override fun invoke(template: String, stack: Stack, memory: Memory): String {
+            var offset = 0
+            val strBuilder = StringBuilder(template)
+            val regex = RegexPattern.PATTERN.regex
+            val matches = regex.findAll(template)
+            for (match in matches) {
+                val all = match.groups[0] ?: continue
+                val group = match.groups[1] ?: continue
+                val size = all.range.last - all.range.first
+                val value = group.value
+                val index = value.toInt()
+
+                val replace = stack.pattern[index]
 
                 strBuilder.replace(
                     all.range.first + offset,

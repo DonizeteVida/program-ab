@@ -5,11 +5,12 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="692fe77d-b9a7-404e-8837-aec1aa54677c" name="Changes" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/bots/jarvis/aiml/hello.json" beforeDir="false" afterPath="$PROJECT_DIR$/bots/jarvis/aiml/hello.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/kotlin/base/Node.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/kotlin/base/Node.kt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/kotlin/base/NodeManager.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/kotlin/base/NodeManager.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/kotlin/base/RegexPattern.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/kotlin/base/RegexPattern.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/kotlin/base/Stack.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/kotlin/base/Stack.kt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/kotlin/base/response/Response.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/kotlin/base/response/Response.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/kotlin/parser/json/Aiml.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/kotlin/parser/json/Aiml.kt" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -110,41 +111,6 @@
           <url>jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.simpleframework/simple-xml/2.7.1/2a949576bb8da7514024dc0b84efeeb2fc902a0/simple-xml-2.7.1-sources.jar!/org/simpleframework/xml/core/InstantiatorBuilder.java</url>
           <line>248</line>
           <option name="timeStamp" value="4" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="kotlin-line">
-          <url>file://$PROJECT_DIR$/src/main/kotlin/base/response/Response.kt</url>
-          <line>111</line>
-          <option name="timeStamp" value="9" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="kotlin-line">
-          <url>file://$PROJECT_DIR$/src/main/kotlin/base/response/Response.kt</url>
-          <line>107</line>
-          <option name="timeStamp" value="10" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="kotlin-line">
-          <url>file://$PROJECT_DIR$/src/main/kotlin/base/NodeManager.kt</url>
-          <line>10</line>
-          <option name="timeStamp" value="11" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="kotlin-line">
-          <url>file://$PROJECT_DIR$/src/main/kotlin/base/NodeManager.kt</url>
-          <line>11</line>
-          <option name="timeStamp" value="12" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="kotlin-line">
-          <url>file://$PROJECT_DIR$/src/main/kotlin/base/NodeManager.kt</url>
-          <line>12</line>
-          <option name="timeStamp" value="13" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="kotlin-line">
-          <url>file://$PROJECT_DIR$/src/main/kotlin/base/NodeManager.kt</url>
-          <line>13</line>
-          <option name="timeStamp" value="14" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="kotlin-line">
-          <url>file://$PROJECT_DIR$/src/main/kotlin/base/NodeManager.kt</url>
-          <line>14</line>
-          <option name="timeStamp" value="15" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>
