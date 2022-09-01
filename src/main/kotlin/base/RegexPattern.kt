@@ -11,5 +11,5 @@ enum class RegexPattern(
     SET("""\{\{\s*set:(\w+)\s*}}""".toRegex()),
     PATTERN("""\{\{\s*pattern:(\d+)\s*}}""".toRegex());
 
-    fun findAll(charSequence: CharSequence) = regex.findAll(charSequence)
+    fun findAll(char: CharSequence) = regex.findAll(char)
 }

@@ -6,6 +6,10 @@
   },
   "categories": [
     {
+      "pattern": "Qual seu nome",
+      "template": "Tua mãe"
+    },
+    {
       "pattern": "Olá",
       "template": "Olá, tudo bem com você?"
     },
@@ -61,7 +65,11 @@
       "template": "Eu também gosto muito de {{ star:0 }} e de {{ star:1 }}"
     },
     {
-      "pattern": "* mas * ou melhor *",
+      "pattern": "Eu gosto de * mas não de *",
+      "template": "{{ star:0 }} e {{ star:1 }}"
+    },
+    {
+      "pattern": "* ou * ou *",
       "template": "{{ star:0 }} ou {{ star:1 }} ou {{ star:2 }}"
     }
   ]

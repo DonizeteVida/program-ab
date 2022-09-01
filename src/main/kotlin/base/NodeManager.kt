@@ -23,23 +23,32 @@ class NodeManager private constructor(
         val pattern = args[0]
         val indices = args.indices
         val node = nodes[pattern] ?: nodes["*"] ?: throw IllegalStateException("A default response must be provided")
-        return findLastNode(node, args, stack, indices, 0)
+        return findLastNode(node, pattern, args, stack, indices, 0)
     }
 
-    private fun findLastNode(node: Node, args: List<String>, stack: Stack, indices: IntRange, cursor: Int): Node? {
+    private fun findLastNode(
+        node: Node,
+        pattern: String,
+        args: List<String>,
+        stack: Stack,
+        indices: IntRange,
+        cursor: Int
+    ): Node? {
         val hasNextArg = cursor + 1 in indices
         if (node.isWildCard) {
             if (!hasNextArg) {
-                stack.star += args[cursor]
-                stack.pattern += args[cursor]
+                stack.star += pattern
+                stack.pattern += pattern
             } else {
-                var allowCardCursor = cursor
-                val matches = arrayListOf<String>()
-                var lookahead: Node? = node.children[args[allowCardCursor]]
+                val matches = arrayListOf(pattern)
+                var allowCardCursor = cursor + 1
+                var patternLookahead = args[allowCardCursor]
+                var lookahead: Node? = node.children[patternLookahead]
                 while (lookahead == null) {
-                    matches += args[allowCardCursor]
-                    if (allowCardCursor + 1 !in indices) break
-                    lookahead = node.children[args[++allowCardCursor]]
+                    matches += patternLookahead
+                    if (++allowCardCursor !in indices) break
+                    patternLookahead = args[allowCardCursor]
+                    lookahead = node.children[patternLookahead]
                 }
                 val arg = matches.joinToString(" ")
                 stack.star += arg
@@ -47,16 +56,16 @@ class NodeManager private constructor(
                 return if (lookahead == null) {
                     node
                 } else {
-                    findLastNode(lookahead, args, stack, indices, allowCardCursor)
+                    findLastNode(lookahead, patternLookahead, args, stack, indices, allowCardCursor)
                 }
             }
         } else {
-            stack.pattern += args[cursor]
+            stack.pattern += pattern
         }
         if (!hasNextArg) return node
-        val pattern = args[cursor + 1]
-        val next = node.children[pattern] ?: node.children["*"] ?: return null
-        return findLastNode(next, args, stack, indices, cursor + 1)
+        val nextPattern = args[cursor + 1]
+        val next = node.children[nextPattern] ?: node.children["*"] ?: return null
+        return findLastNode(next, nextPattern, args, stack, indices, cursor + 1)
     }
 
     companion object {
