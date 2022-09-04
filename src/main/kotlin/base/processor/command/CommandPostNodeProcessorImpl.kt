@@ -8,7 +8,19 @@ import base.processor.NodeProcessor
 class CommandPostNodeProcessorImpl(
     private val memory: Memory
 ) : NodeProcessor<Unit> {
-    override fun invoke(node: Node, stack: Stack) {
+    private val processors = arrayOf(
+        ::StarRegexCommandPostProcessor,
+        ::AssignRegexCommandPostProcessor
+    )
 
+    override fun invoke(node: Node, stack: Stack) {
+        for (command in node.commands) {
+            val builder = StringBuilder(command)
+            processors.map {
+                it(stack, memory)
+            }.forEach {
+                it(builder)
+            }
+        }
     }
 }

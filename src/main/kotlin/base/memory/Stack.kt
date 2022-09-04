@@ -1,7 +1,7 @@
 package base.memory
 
 data class Stack(
-    val pattern: MutableList<String> = arrayListOf(),
-    val star: MutableList<String> = arrayListOf(),
-    val that: MutableList<String> = arrayListOf()
+    val pattern: ArrayList<String> = arrayListOf(),
+    val star: ArrayList<String> = arrayListOf(),
+    val that: ArrayList<String> = arrayListOf()
 )
