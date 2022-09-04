@@ -2,12 +2,12 @@ package base.processor.template
 
 import base.memory.Memory
 import base.Node
-import base.processor.Processor
+import base.processor.NodeProcessor
 import base.memory.Stack
 
-class TemplatePostProcessorImpl(
+class TemplatePostNodeProcessorImpl(
     private val memory: Memory
-) : Processor<TemplatePostProcessor.Result> {
+) : NodeProcessor<TemplatePostProcessor.Result> {
     private val transformers = arrayOf(
         ::StarRegexTemplatePostProcessor,
         ::PatternRegexTemplatePostProcessor,

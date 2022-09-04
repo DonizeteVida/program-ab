@@ -1,4 +1,4 @@
-package base
+package base.regex
 
 enum class RegexPattern(
     private val regex: Regex

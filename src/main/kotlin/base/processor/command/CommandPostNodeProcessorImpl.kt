@@ -3,11 +3,11 @@ package base.processor.command
 import base.Node
 import base.memory.Memory
 import base.memory.Stack
-import base.processor.Processor
+import base.processor.NodeProcessor
 
-class CommandPostProcessorImpl(
+class CommandPostNodeProcessorImpl(
     private val memory: Memory
-) : Processor<Unit> {
+) : NodeProcessor<Unit> {
     override fun invoke(node: Node, stack: Stack) {
 
     }

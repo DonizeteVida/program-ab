@@ -3,23 +3,23 @@ package base.processor
 import base.memory.Memory
 import base.Node
 import base.memory.Stack
-import base.processor.command.CommandPostProcessorImpl
-import base.processor.template.TemplatePostProcessorImpl
+import base.processor.command.CommandPostNodeProcessorImpl
+import base.processor.template.TemplatePostNodeProcessorImpl
 import base.processor.template.TemplatePostProcessor
 import parser.json.Aiml
 
 class NodeManager private constructor(
     private val nodes: HashMap<String, Node> = hashMapOf(),
-    private val templatePostProcessor: Processor<TemplatePostProcessor.Result>,
-    private val commandPostProcessor: Processor<Unit>
+    private val templatePostNodeProcessor: NodeProcessor<TemplatePostProcessor.Result>,
+    private val commandPostNodeProcessor: NodeProcessor<Unit>
 ) {
     fun find(pattern: String): String {
         val args = pattern.split(" ")
         if (args.isEmpty()) throw IllegalStateException("A pattern must be provided")
         val stack = Stack()
         val node = internalFind(args, stack) ?: return "Logic not implemented yet"
-        commandPostProcessor(node, stack)
-        return when (val result = templatePostProcessor(node, stack)) {
+        commandPostNodeProcessor(node, stack)
+        return when (val result = templatePostNodeProcessor(node, stack)) {
             is TemplatePostProcessor.Result.Finish -> result.string
             is TemplatePostProcessor.Result.Rerun -> find(result.string)
             is TemplatePostProcessor.Result.Success -> throw IllegalStateException("Success result should be handled internally")
@@ -71,7 +71,7 @@ class NodeManager private constructor(
         }
         if (!hasNextArg) return node
         val nextPattern = args[cursor + 1]
-        val next = node[nextPattern] ?: node.children["*"] ?: return null
+        val next = node[nextPattern] ?: node["*"] ?: return null
         return findLastNode(next, nextPattern, args, stack, indices, cursor + 1)
     }
 
@@ -103,8 +103,8 @@ class NodeManager private constructor(
             override fun invoke(): NodeManager {
                 val nodes = hashMapOf<String, Node>()
                 val memory = Memory()
-                val templatePostProcessorImpl = TemplatePostProcessorImpl(memory)
-                val commandPostProcessorImpl = CommandPostProcessorImpl(memory)
+                val templatePostProcessorImpl = TemplatePostNodeProcessorImpl(memory)
+                val commandPostProcessorImpl = CommandPostNodeProcessorImpl(memory)
 
                 data.map(Aiml::variables).forEach {
                     it.forEach { (key, value) ->

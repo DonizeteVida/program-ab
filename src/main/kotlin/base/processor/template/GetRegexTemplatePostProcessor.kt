@@ -1,7 +1,7 @@
 package base.processor.template
 
 import base.memory.Memory
-import base.RegexPattern
+import base.regex.RegexPattern
 import base.memory.Stack
 
 class GetRegexTemplatePostProcessor(
