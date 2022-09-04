@@ -1,18 +1,22 @@
-package base
+package base.manager
 
-import base.postprocessor.StringPostProcessor
+import base.memory.Memory
+import base.Node
+import base.memory.Stack
+import base.manager.postprocessor.PostProcessorManager
+import base.manager.postprocessor.StringPostProcessor
 import parser.json.Aiml
 
 class NodeManager private constructor(
     private val nodes: HashMap<String, Node> = hashMapOf(),
-    private val transformManager: TransformManager
+    private val postProcessorManager: PostProcessorManager
 ) {
     fun find(pattern: String): String {
         val args = pattern.split(" ")
         if (args.isEmpty()) throw IllegalStateException("A pattern must be provided")
         val stack = Stack()
         val node = internalFind(args, stack) ?: return "Logic not implemented yet"
-        return when (val result = transformManager.transform(node, stack)) {
+        return when (val result = postProcessorManager.transform(node, stack)) {
             is StringPostProcessor.Result.Finish -> result.string
             is StringPostProcessor.Result.Rerun -> find(result.string)
             is StringPostProcessor.Result.Success -> throw IllegalStateException("Success result should be handled internally")
@@ -43,12 +47,12 @@ class NodeManager private constructor(
                 val matches = arrayListOf(pattern)
                 var allowCardCursor = cursor + 1
                 var patternLookahead = args[allowCardCursor]
-                var lookahead: Node? = node.children[patternLookahead]
+                var lookahead: Node? = node[patternLookahead]
                 while (lookahead == null) {
                     matches += patternLookahead
                     if (++allowCardCursor !in indices) break
                     patternLookahead = args[allowCardCursor]
-                    lookahead = node.children[patternLookahead]
+                    lookahead = node[patternLookahead]
                 }
                 val arg = matches.joinToString(" ")
                 stack.star += arg
@@ -64,7 +68,7 @@ class NodeManager private constructor(
         }
         if (!hasNextArg) return node
         val nextPattern = args[cursor + 1]
-        val next = node.children[nextPattern] ?: node.children["*"] ?: return null
+        val next = node[nextPattern] ?: node.children["*"] ?: return null
         return findLastNode(next, nextPattern, args, stack, indices, cursor + 1)
     }
 
@@ -96,7 +100,7 @@ class NodeManager private constructor(
             override fun invoke(): NodeManager {
                 val nodes = hashMapOf<String, Node>()
                 val memory = Memory()
-                val transformManager = TransformManager(memory)
+                val postProcessorManager = PostProcessorManager(memory)
 
                 data.map(Aiml::variables).forEach {
                     it.forEach { (key, value) ->
@@ -124,7 +128,7 @@ class NodeManager private constructor(
                     }
                 }
 
-                return NodeManager(nodes, transformManager)
+                return NodeManager(nodes, postProcessorManager)
             }
         }
     }

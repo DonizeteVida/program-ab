@@ -69,7 +69,7 @@
       "template": "{{ star:0 }} e {{ star:1 }}"
     },
     {
-      "pattern": "* ou * ou *",
+      "pattern": "* ou * ou * e",
       "template": "{{ star:0 }} ou {{ star:1 }} ou {{ star:2 }}"
     }
   ]

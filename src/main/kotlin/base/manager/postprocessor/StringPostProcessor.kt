@@ -1,4 +1,4 @@
-package base.postprocessor
+package base.manager.postprocessor
 
 interface StringPostProcessor {
     sealed interface Result {

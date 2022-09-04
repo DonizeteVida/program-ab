@@ -1,4 +1,4 @@
-package base
+package base.memory
 
 data class Stack(
     val pattern: MutableList<String> = arrayListOf(),

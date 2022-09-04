@@ -1,8 +1,10 @@
-package base
+package base.manager.postprocessor
 
-import base.postprocessor.*
+import base.memory.Memory
+import base.Node
+import base.memory.Stack
 
-class TransformManager(
+class PostProcessorManager(
     private val memory: Memory
 ) {
     private val transformers = arrayOf<(Stack, Memory) -> StringPostProcessor>(

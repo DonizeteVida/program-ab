@@ -1,8 +1,8 @@
-package base.postprocessor
+package base.manager.postprocessor
 
-import base.Memory
+import base.memory.Memory
 import base.RegexPattern
-import base.Stack
+import base.memory.Stack
 
 class GetRegexStringPostProcessor(
     private val stack: Stack,
