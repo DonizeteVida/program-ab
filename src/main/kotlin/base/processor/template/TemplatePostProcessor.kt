@@ -1,6 +1,6 @@
-package base.manager.postprocessor
+package base.processor.template
 
-interface StringPostProcessor {
+interface TemplatePostProcessor {
     sealed interface Result {
         data class Finish(
             val string: String

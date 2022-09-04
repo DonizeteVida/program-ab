@@ -1,13 +1,13 @@
-package base.manager.postprocessor
+package base.processor.template
 
 import base.memory.Memory
 import base.RegexPattern
 import base.memory.Stack
 
-class GetFallbackRegexStringPostProcessor(
+class GetFallbackRegexTemplatePostProcessor(
     private val stack: Stack,
     private val memory: Memory
-) : RegexStringPostProcessor(
+) : RegexTemplatePostProcessor(
     RegexPattern.GET_FALLBACK
 ) {
     override fun onMatch(matchResult: MatchResult): String {

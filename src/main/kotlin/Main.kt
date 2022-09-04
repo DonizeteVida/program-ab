@@ -1,4 +1,4 @@
-import base.manager.NodeManager
+import base.processor.NodeManager
 import extension.use
 import parser.Parser
 import parser.json.Aiml

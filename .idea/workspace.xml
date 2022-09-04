@@ -5,9 +5,17 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="692fe77d-b9a7-404e-8837-aec1aa54677c" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/gradle.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/gradle.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/vcs.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/kotlin/Main.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/kotlin/Main.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/kotlin/base/manager/NodeManager.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/kotlin/base/processor/NodeManager.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/kotlin/base/manager/postprocessor/GetFallbackRegexStringPostProcessor.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/kotlin/base/processor/post/GetFallbackRegexStringPostProcessor.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/kotlin/base/manager/postprocessor/GetRegexStringPostProcessor.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/kotlin/base/processor/post/GetRegexStringPostProcessor.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/kotlin/base/manager/postprocessor/PatternRegexStringPostProcessor.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/kotlin/base/processor/post/PatternRegexStringPostProcessor.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/kotlin/base/manager/postprocessor/PostProcessorManager.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/kotlin/base/processor/post/StringPostProcessorImpl.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/kotlin/base/manager/postprocessor/RegexStringPostProcessor.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/kotlin/base/processor/post/RegexStringPostProcessor.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/kotlin/base/manager/postprocessor/SraiRegexStringPostProcessor.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/kotlin/base/processor/post/SraiRegexStringPostProcessor.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/kotlin/base/manager/postprocessor/StarRegexStringPostProcessor.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/kotlin/base/processor/post/StarRegexStringPostProcessor.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/kotlin/base/manager/postprocessor/StringPostProcessor.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/kotlin/base/processor/post/StringPostProcessor.kt" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -59,6 +67,9 @@
       <recent name="$PROJECT_DIR$" />
     </key>
     <key name="MoveKotlinTopLevelDeclarationsDialog.RECENTS_KEY">
+      <recent name="base.memory" />
+      <recent name="base.manager" />
+      <recent name="base.manager.postprocessor" />
       <recent name="base.transformation" />
       <recent name="base.response" />
     </key>
@@ -116,24 +127,19 @@
           <option name="timeStamp" value="4" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="kotlin-line">
-          <url>file://$PROJECT_DIR$/src/main/kotlin/base/postprocessor/SraiRegexStringPostProcessor.kt</url>
+          <url>file://$PROJECT_DIR$/src/main/kotlin/base/processor/post/SraiRegexStringPostProcessor.kt</url>
           <line>17</line>
           <option name="timeStamp" value="11" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="kotlin-line">
-          <url>file://$PROJECT_DIR$/src/main/kotlin/base/postprocessor/SraiRegexStringPostProcessor.kt</url>
+          <url>file://$PROJECT_DIR$/src/main/kotlin/base/processor/post/SraiRegexStringPostProcessor.kt</url>
           <line>19</line>
           <option name="timeStamp" value="12" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="kotlin-line">
-          <url>file://$PROJECT_DIR$/src/main/kotlin/base/postprocessor/SraiRegexStringPostProcessor.kt</url>
+          <url>file://$PROJECT_DIR$/src/main/kotlin/base/processor/post/SraiRegexStringPostProcessor.kt</url>
           <line>9</line>
           <option name="timeStamp" value="19" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="kotlin-line">
-          <url>file://$PROJECT_DIR$/src/main/kotlin/base/NodeManager.kt</url>
-          <line>14</line>
-          <option name="timeStamp" value="27" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>

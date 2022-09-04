@@ -1,19 +1,19 @@
-package base.manager.postprocessor
+package base.processor.template
 
 import base.memory.Memory
 import base.RegexPattern
 import base.memory.Stack
 
-class StarRegexStringPostProcessor(
+class PatternRegexTemplatePostProcessor(
     private val stack: Stack,
     private val memory: Memory
-) : RegexStringPostProcessor(
-    RegexPattern.STAR
+) : RegexTemplatePostProcessor(
+    RegexPattern.PATTERN
 ) {
     override fun onMatch(matchResult: MatchResult): String {
         val group = matchResult.groups[1] ?: throw IllegalStateException("Should never happen")
         val string = group.value
         val integer = string.toInt()
-        return stack.star[integer]
+        return stack.pattern[integer]
     }
 }

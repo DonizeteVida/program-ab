@@ -1,11 +1,11 @@
-package base.manager.postprocessor
+package base.processor.template
 
 import base.RegexPattern
 
-abstract class RegexStringPostProcessor(
+abstract class RegexTemplatePostProcessor(
     private val regexPattern: RegexPattern
-) : StringPostProcessor {
-    override fun invoke(builder: StringBuilder): StringPostProcessor.Result {
+) : TemplatePostProcessor {
+    override fun invoke(builder: StringBuilder): TemplatePostProcessor.Result {
         var offset = 0
         val matches = regexPattern.findAll(builder.toString())
         val count = matches.count()
@@ -25,6 +25,6 @@ abstract class RegexStringPostProcessor(
 
     abstract fun onMatch(matchResult: MatchResult): String
 
-    open fun onFinish(string: StringBuilder, matchCounter: Int): StringPostProcessor.Result =
-        StringPostProcessor.Result.Success
+    open fun onFinish(string: StringBuilder, matchCounter: Int): TemplatePostProcessor.Result =
+        TemplatePostProcessor.Result.Success
 }

@@ -1,13 +1,13 @@
-package base.manager.postprocessor
+package base.processor.template
 
 import base.memory.Memory
 import base.RegexPattern
 import base.memory.Stack
 
-class SraiRegexStringPostProcessor(
+class SraiRegexTemplatePostProcessor(
     private val stack: Stack,
     private val memory: Memory
-) : RegexStringPostProcessor(
+) : RegexTemplatePostProcessor(
     RegexPattern.SRAI
 ) {
     override fun onMatch(matchResult: MatchResult) =
@@ -15,8 +15,8 @@ class SraiRegexStringPostProcessor(
 
     override fun onFinish(string: StringBuilder, matchCounter: Int) =
         if (matchCounter > 0) {
-            StringPostProcessor.Result.Rerun(string.toString())
+            TemplatePostProcessor.Result.Rerun(string.toString())
         } else {
-            StringPostProcessor.Result.Success
+            TemplatePostProcessor.Result.Success
         }
 }

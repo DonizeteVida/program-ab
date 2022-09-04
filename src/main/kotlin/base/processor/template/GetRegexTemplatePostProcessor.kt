@@ -1,19 +1,18 @@
-package base.manager.postprocessor
+package base.processor.template
 
 import base.memory.Memory
 import base.RegexPattern
 import base.memory.Stack
 
-class PatternRegexStringPostProcessor(
+class GetRegexTemplatePostProcessor(
     private val stack: Stack,
     private val memory: Memory
-) : RegexStringPostProcessor(
-    RegexPattern.PATTERN
+) : RegexTemplatePostProcessor(
+    RegexPattern.GET
 ) {
     override fun onMatch(matchResult: MatchResult): String {
         val group = matchResult.groups[1] ?: throw IllegalStateException("Should never happen")
-        val string = group.value
-        val integer = string.toInt()
-        return stack.pattern[integer]
+        val name = group.value
+        return memory.variables[name] ?: throw IllegalStateException("Variable $name not found in $memory")
     }
 }

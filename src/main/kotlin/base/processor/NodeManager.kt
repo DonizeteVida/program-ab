@@ -1,25 +1,28 @@
-package base.manager
+package base.processor
 
 import base.memory.Memory
 import base.Node
 import base.memory.Stack
-import base.manager.postprocessor.PostProcessorManager
-import base.manager.postprocessor.StringPostProcessor
+import base.processor.command.CommandPostProcessorImpl
+import base.processor.template.TemplatePostProcessorImpl
+import base.processor.template.TemplatePostProcessor
 import parser.json.Aiml
 
 class NodeManager private constructor(
     private val nodes: HashMap<String, Node> = hashMapOf(),
-    private val postProcessorManager: PostProcessorManager
+    private val templatePostProcessor: Processor<TemplatePostProcessor.Result>,
+    private val commandPostProcessor: Processor<Unit>
 ) {
     fun find(pattern: String): String {
         val args = pattern.split(" ")
         if (args.isEmpty()) throw IllegalStateException("A pattern must be provided")
         val stack = Stack()
         val node = internalFind(args, stack) ?: return "Logic not implemented yet"
-        return when (val result = postProcessorManager.transform(node, stack)) {
-            is StringPostProcessor.Result.Finish -> result.string
-            is StringPostProcessor.Result.Rerun -> find(result.string)
-            is StringPostProcessor.Result.Success -> throw IllegalStateException("Success result should be handled internally")
+        commandPostProcessor(node, stack)
+        return when (val result = templatePostProcessor(node, stack)) {
+            is TemplatePostProcessor.Result.Finish -> result.string
+            is TemplatePostProcessor.Result.Rerun -> find(result.string)
+            is TemplatePostProcessor.Result.Success -> throw IllegalStateException("Success result should be handled internally")
         }
     }
 
@@ -100,7 +103,8 @@ class NodeManager private constructor(
             override fun invoke(): NodeManager {
                 val nodes = hashMapOf<String, Node>()
                 val memory = Memory()
-                val postProcessorManager = PostProcessorManager(memory)
+                val templatePostProcessorImpl = TemplatePostProcessorImpl(memory)
+                val commandPostProcessorImpl = CommandPostProcessorImpl(memory)
 
                 data.map(Aiml::variables).forEach {
                     it.forEach { (key, value) ->
@@ -128,7 +132,7 @@ class NodeManager private constructor(
                     }
                 }
 
-                return NodeManager(nodes, postProcessorManager)
+                return NodeManager(nodes, templatePostProcessorImpl, commandPostProcessorImpl)
             }
         }
     }
