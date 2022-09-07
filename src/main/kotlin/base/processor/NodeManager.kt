@@ -1,12 +1,13 @@
 package base.processor
 
-import base.memory.Memory
 import base.Node
+import base.memory.Memory
 import base.memory.Stack
 import base.processor.command.CommandPostNodeProcessorImpl
 import base.processor.template.TemplatePostNodeProcessorImpl
 import base.processor.template.TemplatePostProcessor
 import parser.json.Aiml
+import parser.json.Category
 
 class NodeManager private constructor(
     private val nodes: HashMap<String, Node> = hashMapOf(),
@@ -76,43 +77,44 @@ class NodeManager private constructor(
     }
 
     companion object {
-        fun <T> build(builder: Builder<T>) = builder()
-    }
+        private fun buildNodeTree(
+            last: Node,
+            parent: Node?,
+            args: List<String>,
+            indices: IntRange,
+            cursor: Int
+        ): Pair<Node, Node?> {
+            if (cursor + 1 !in indices) return last to parent
+            val nextPattern = args[cursor + 1]
+            val next = last[nextPattern] ?: Node(
+                nextPattern
+            ).also {
+                last[nextPattern] = it
+            }
+            return buildNodeTree(next, last, args, indices, cursor + 1)
+        }
 
-    sealed interface Builder<T> : () -> NodeManager {
-        data class JsonBuilder(
-            val data: List<Aiml>
-        ) : Builder<List<Aiml>> {
-            private fun buildNodeTree(
-                actual: Node,
-                prev: Node?,
-                args: List<String>,
-                indices: IntRange,
-                cursor: Int
-            ): Pair<Node, Node?> {
-                if (cursor + 1 !in indices) return actual to prev
-                val pattern = args[cursor + 1]
-                val next = actual[pattern] ?: Node(
-                    pattern
-                ).also {
-                    actual[pattern] = it
-                }
-                return buildNodeTree(next, actual, args, indices, cursor + 1)
+        private fun expandCategoryIfNecessary(category: Category): List<Category> {
+            return arrayListOf(category)
+        }
+
+        fun build(data: List<Aiml>): NodeManager {
+            val nodes = hashMapOf<String, Node>()
+            val memory = Memory()
+            val templatePostProcessorImpl = TemplatePostNodeProcessorImpl(memory)
+            val commandPostProcessorImpl = CommandPostNodeProcessorImpl(memory)
+
+            data.map(Aiml::variables).forEach {
+                memory.variables.putAll(it)
             }
 
-            override fun invoke(): NodeManager {
-                val nodes = hashMapOf<String, Node>()
-                val memory = Memory()
-                val templatePostProcessorImpl = TemplatePostNodeProcessorImpl(memory)
-                val commandPostProcessorImpl = CommandPostNodeProcessorImpl(memory)
-
-                data.map(Aiml::variables).forEach {
-                    it.forEach { (key, value) ->
-                        memory.variables[key] = value
-                    }
-                }
-
-                data.map(Aiml::categories).flatten().map {
+            data
+                .asSequence()
+                .map(Aiml::categories)
+                .flatten()
+                .map(::expandCategoryIfNecessary)
+                .flatten()
+                .forEach {
                     val args = it.pattern.split(" ")
                     val pattern = args[0]
                     val node = nodes[pattern] ?: Node(
@@ -120,20 +122,19 @@ class NodeManager private constructor(
                     ).also { node ->
                         nodes[pattern] = node
                     }
-                    val (actual, prev) = buildNodeTree(node, null, args, args.indices, 0)
-                    val finally = actual.copy(
+                    val (last, parent) = buildNodeTree(node, null, args, args.indices, 0)
+                    val lastCopy = last.copy(
                         template = it.template,
                         commands = it.commands ?: emptyList()
                     )
-                    if (prev == null) {
-                        nodes[pattern] = finally
+                    if (parent == null) {
+                        nodes[pattern] = lastCopy
                     } else {
-                        prev[finally.pattern] = finally
+                        parent[lastCopy.pattern] = lastCopy
                     }
                 }
 
-                return NodeManager(nodes, templatePostProcessorImpl, commandPostProcessorImpl)
-            }
+            return NodeManager(nodes, templatePostProcessorImpl, commandPostProcessorImpl)
         }
     }
 }
