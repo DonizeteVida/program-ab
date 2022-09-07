@@ -10,8 +10,7 @@ class SraiRegexTemplatePostProcessor(
 ) : RegexTemplatePostProcessor(
     RegexPattern.SRAI
 ) {
-    override fun onMatch(matchResult: MatchResult) =
-        matchResult.groups[1]?.value ?: throw IllegalStateException("Should never happen")
+    override fun onMatch(matchResult: MatchResult) = matchResult.groups[1]!!.value
 
     override fun onFinish(builder: StringBuilder, matchCounter: Int) =
         if (matchCounter > 0) {

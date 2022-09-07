@@ -1,8 +1,8 @@
 package base.processor.template
 
 import base.memory.Memory
-import base.regex.RegexPattern
 import base.memory.Stack
+import base.regex.RegexPattern
 
 class GetFallbackRegexTemplatePostProcessor(
     private val stack: Stack,
@@ -11,11 +11,9 @@ class GetFallbackRegexTemplatePostProcessor(
     RegexPattern.GET_FALLBACK
 ) {
     override fun onMatch(matchResult: MatchResult): String {
-        val group1 = matchResult.groups[1] ?: throw IllegalStateException("Should never happen")
-        val group2 = matchResult.groups[2] ?: throw IllegalStateException("Should never happen")
-        val name1 = group1.value
-        val name2 = group2.value
-        return memory.variables[name1] ?: memory.variables[name2]
-        ?: throw IllegalStateException("Variable $name1 neither $name2 not found in $memory")
+        val variable1 = matchResult.groups[1]!!.value
+        val variable2 = matchResult.groups[2]!!.value
+        return memory.variables[variable1] ?: memory.variables[variable2]
+        ?: throw IllegalStateException("Variable $variable1 neither $variable2 weren't found in $memory")
     }
 }

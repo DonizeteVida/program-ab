@@ -1,8 +1,8 @@
 package base.processor.template
 
 import base.memory.Memory
-import base.regex.RegexPattern
 import base.memory.Stack
+import base.regex.RegexPattern
 
 class PatternRegexTemplatePostProcessor(
     private val stack: Stack,
@@ -11,9 +11,6 @@ class PatternRegexTemplatePostProcessor(
     RegexPattern.PATTERN
 ) {
     override fun onMatch(matchResult: MatchResult): String {
-        val group = matchResult.groups[1] ?: throw IllegalStateException("Should never happen")
-        val string = group.value
-        val integer = string.toInt()
-        return stack.pattern[integer]
+        return matchResult.groups[1]!!.value.toInt().let(stack.pattern::get)
     }
 }

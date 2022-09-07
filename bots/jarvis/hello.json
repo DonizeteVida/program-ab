@@ -57,8 +57,8 @@
       "template": "Qual foi"
     },
     {
-      "pattern": "O {{ set:cars }} é muito bonito",
-      "template": "Sim, o {{ pattern:0 }} é muito bonito mesmo"
+      "pattern": "Eu gosto de dirigir {{ set:cars }} {{ set:where }} {{ set:countries }}",
+      "template": "Sim, deve ser muito bom dirigir {{ pattern:4 }} no {{ pattern:6 }}"
     },
     {
       "pattern": "Eu gosto muito de * e também de *",
@@ -78,6 +78,15 @@
       "Fusca",
       "Camaro",
       "Gol"
+    ],
+    "countries": [
+      "Brasil",
+      "Inglaterra"
+    ],
+    "where": [
+      "na",
+      "no",
+      "em"
     ]
   }
 }

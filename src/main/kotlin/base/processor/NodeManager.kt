@@ -6,6 +6,7 @@ import base.memory.Stack
 import base.processor.command.CommandPostNodeProcessorImpl
 import base.processor.template.TemplatePostNodeProcessorImpl
 import base.processor.template.TemplatePostProcessor
+import base.regex.RegexPattern
 import parser.json.Aiml
 import parser.json.Category
 
@@ -94,25 +95,48 @@ class NodeManager private constructor(
             return buildNodeTree(next, last, args, indices, cursor + 1)
         }
 
-        private fun expandCategoryIfNecessary(category: Category): List<Category> {
-            return arrayListOf(category)
+        private fun expandCategoryIfNecessary(category: Category, aiml: Aiml): List<Category> {
+            //sorry gods of code optimization
+            //I, honestly, don't know to make it better
+            val pattern = category.pattern
+            val matches = RegexPattern.SET.findAll(pattern)
+            if (!matches.any()) return arrayListOf(category)
+            val expanded = arrayListOf(pattern)
+            for (m in matches) {
+                val all = m.groups[0]!!.value
+                val variable = m.groups[1]!!.value
+                val sets = aiml.sets[variable] ?: throw IllegalStateException("Set $variable not found")
+                sets.map { set ->
+                    expanded.map { pattern ->
+                        pattern.replace(all, set)
+                    }
+                }.flatten().also {
+                    expanded.clear()
+                    expanded.addAll(it)
+                }
+            }
+            return expanded.map {
+                category.copy(
+                    pattern = it
+                )
+            }
         }
 
         fun build(data: List<Aiml>): NodeManager {
             val nodes = hashMapOf<String, Node>()
             val memory = Memory()
-            val templatePostProcessorImpl = TemplatePostNodeProcessorImpl(memory)
-            val commandPostProcessorImpl = CommandPostNodeProcessorImpl(memory)
+            val templatePostNodeProcessor = TemplatePostNodeProcessorImpl(memory)
+            val commandPostProcessor = CommandPostNodeProcessorImpl(memory)
 
-            data.map(Aiml::variables).forEach {
-                memory.variables.putAll(it)
-            }
+            data.map(Aiml::variables).forEach(memory.variables::putAll)
 
             data
-                .asSequence()
-                .map(Aiml::categories)
+                .map { aiml ->
+                    aiml.categories.map {
+                        expandCategoryIfNecessary(it, aiml)
+                    }
+                }
                 .flatten()
-                .map(::expandCategoryIfNecessary)
                 .flatten()
                 .forEach {
                     val args = it.pattern.split(" ")
@@ -134,7 +158,7 @@ class NodeManager private constructor(
                     }
                 }
 
-            return NodeManager(nodes, templatePostProcessorImpl, commandPostProcessorImpl)
+            return NodeManager(nodes, templatePostNodeProcessor, commandPostProcessor)
         }
     }
 }

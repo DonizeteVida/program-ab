@@ -1,9 +1,9 @@
 package base.processor.template
 
-import base.memory.Memory
 import base.Node
-import base.processor.NodeProcessor
+import base.memory.Memory
 import base.memory.Stack
+import base.processor.NodeProcessor
 
 class TemplatePostNodeProcessorImpl(
     private val memory: Memory
