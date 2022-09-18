@@ -80,17 +80,32 @@ class NodeManager private constructor(
 
     companion object {
         private fun buildNodeTree(
-            currentNode: Node, parentNode: Node?, args: List<String>, indices: IntRange, cursor: Int
-        ): Pair<Node, Node?> {
-            val nextCursor = cursor + 1
-            if (nextCursor !in indices) return currentNode to parentNode
-            val nextArg = args[nextCursor]
-            val nextNode = currentNode[nextArg] ?: Node(
-                nextArg
-            ).also {
-                currentNode[nextArg] = it
+            nodes: MutableMap<String, Node>,
+            category: Category
+        ) {
+            val args = category.pattern.split(" ")
+            val indices = args.indices
+            var cursor = 0
+            var arg = args[cursor]
+            var prev = nodes[arg]
+            while (++cursor in indices) {
+                if (prev == null) {
+                    val next = Node(arg)
+                    nodes[arg] = next
+                    prev = next
+                } else {
+                    var next = prev[arg]
+                    if (next == null) {
+                        next = Node(arg)
+                        prev[arg] = next
+                    }
+                    prev = next
+                }
+                arg = args[cursor]
             }
-            return buildNodeTree(nextNode, currentNode, args, indices, nextCursor)
+            val next = Node(arg, category.template)
+            if (prev == null) throw IllegalStateException("Node tree not built properly")
+            prev[arg] = next
         }
 
         private fun expandSetPattern(category: Category, aiml: Aiml): List<Category> {
@@ -120,7 +135,13 @@ class NodeManager private constructor(
             }
         }
 
+        fun findThatNode(that: String, thats: List<String>, indices: IntRange, cursor: Int): Node? {
+
+            return null
+        }
+
         fun build(data: List<Aiml>): NodeManager {
+            val thats = hashMapOf<String, Node>()
             val nodes = hashMapOf<String, Node>()
             val memory = Memory()
             val templatePostNodeProcessor = TemplatePostNodeProcessorImpl(memory)
@@ -135,21 +156,18 @@ class NodeManager private constructor(
                     expandSetPattern(it, aiml)
                 }
             }.flatten().flatten().forEach {
-                val args = it.pattern.split(" ")
-                val pattern = args[0]
-                val node = nodes[pattern] ?: Node(
-                    pattern
-                ).also { node ->
-                    nodes[pattern] = node
-                }
-                val (currentNode, parentNode) = buildNodeTree(node, null, args, args.indices, 0)
-                currentNode.copy(
-                    template = it.template, commands = it.commands ?: emptyList()
-                ).also { also ->
-                    if (parentNode == null) {
-                        nodes[pattern] = also
-                    } else {
-                        parentNode[also.pattern] = also
+                buildNodeTree(nodes, it)
+            }
+
+            data.map { aiml ->
+                aiml.categories.filter {
+                    it.that != null
+                }.forEach {
+                    val thats = it.that?.split(" ") ?: emptyList()
+                    val that = thats[0]
+                    val thatNode = findThatNode(that, thats, thats.indices, 0)
+                    if (thatNode != null) {
+
                     }
                 }
             }
