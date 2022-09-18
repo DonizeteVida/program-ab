@@ -19,7 +19,7 @@ class NodeManager private constructor(
         val args = pattern.split(" ")
         if (args.isEmpty()) throw IllegalStateException("A pattern must be provided")
         val stack = Stack()
-        val node = internalFind(args, stack) ?: return "Logic not implemented yet"
+        val node = internalFind(args, stack) ?: throw IllegalStateException("Partial matching not implemented yet")
         commandPostNodeProcessor(node, stack)
         return when (val result = templatePostNodeProcessor(node, stack)) {
             is TemplatePostProcessor.Result.Finish -> result.string
@@ -36,68 +36,61 @@ class NodeManager private constructor(
     }
 
     private fun findLastNode(
-        node: Node,
-        pattern: String,
-        args: List<String>,
-        stack: Stack,
-        indices: IntRange,
-        cursor: Int
+        node: Node, arg: String, args: List<String>, stack: Stack, indices: IntRange, cursor: Int
     ): Node? {
-        val hasNextArg = cursor + 1 in indices
+        val nextCursor = cursor + 1
+        val hasNextArg = nextCursor in indices
         if (node.isWildCard) {
-            if (!hasNextArg) {
-                stack.star += pattern
-                stack.pattern += pattern
-            } else {
-                val matches = arrayListOf(pattern)
-                var allowCardCursor = cursor + 1
-                var patternLookahead = args[allowCardCursor]
-                var lookahead: Node? = node[patternLookahead]
-                while (lookahead == null) {
-                    matches += patternLookahead
-                    if (++allowCardCursor !in indices) break
-                    patternLookahead = args[allowCardCursor]
-                    lookahead = node[patternLookahead]
+            if (hasNextArg) {
+                //wild card lookahead logic
+                val wildMatches = arrayListOf(arg)
+                var wildCursor = cursor + 1
+                var nextArg = args[wildCursor]
+                var nextNode = node[nextArg]
+                //if next node equals null
+                //we should use current nextArg as wild matching argument
+                while (nextNode == null) {
+                    wildMatches += nextArg
+                    if (++wildCursor !in indices) break
+                    nextArg = args[wildCursor]
+                    nextNode = node[nextArg]
                 }
-                val arg = matches.joinToString(" ")
-                stack.star += arg
-                stack.pattern += arg
-                return if (lookahead == null) {
+                val actualArg = wildMatches.joinToString(" ")
+                stack.star += actualArg
+                stack.pattern += actualArg
+                return if (nextNode == null) {
                     node
                 } else {
-                    findLastNode(lookahead, patternLookahead, args, stack, indices, allowCardCursor)
+                    findLastNode(nextNode, nextArg, args, stack, indices, wildCursor)
                 }
             }
-        } else {
-            stack.pattern += pattern
+            stack.star += arg
         }
+        stack.pattern += arg
         if (!hasNextArg) return node
-        val nextPattern = args[cursor + 1]
-        val next = node[nextPattern] ?: node["*"] ?: return null
-        return findLastNode(next, nextPattern, args, stack, indices, cursor + 1)
+        val nextArg = args[nextCursor]
+        val nextNode = node[nextArg] ?: node["*"] ?: return null
+        return findLastNode(nextNode, nextArg, args, stack, indices, nextCursor)
     }
 
     companion object {
         private fun buildNodeTree(
-            last: Node,
-            parent: Node?,
-            args: List<String>,
-            indices: IntRange,
-            cursor: Int
+            currentNode: Node, parentNode: Node?, args: List<String>, indices: IntRange, cursor: Int
         ): Pair<Node, Node?> {
-            if (cursor + 1 !in indices) return last to parent
-            val nextPattern = args[cursor + 1]
-            val next = last[nextPattern] ?: Node(
-                nextPattern
+            val nextCursor = cursor + 1
+            if (nextCursor !in indices) return currentNode to parentNode
+            val nextArg = args[nextCursor]
+            val nextNode = currentNode[nextArg] ?: Node(
+                nextArg
             ).also {
-                last[nextPattern] = it
+                currentNode[nextArg] = it
             }
-            return buildNodeTree(next, last, args, indices, cursor + 1)
+            return buildNodeTree(nextNode, currentNode, args, indices, nextCursor)
         }
 
         private fun expandCategoryIfNecessary(category: Category, aiml: Aiml): List<Category> {
-            //sorry gods of code optimization
-            //I, honestly, don't know to make it better
+            //Sorry gods of code optimization
+            //I, honestly, don't know how to make it better
             val pattern = category.pattern
             val matches = RegexPattern.SET.findAll(pattern)
             if (!matches.any()) return arrayListOf(category)
@@ -130,33 +123,29 @@ class NodeManager private constructor(
 
             data.map(Aiml::variables).forEach(memory.variables::putAll)
 
-            data
-                .map { aiml ->
-                    aiml.categories.map {
-                        expandCategoryIfNecessary(it, aiml)
-                    }
+            data.map { aiml ->
+                aiml.categories.map {
+                    expandCategoryIfNecessary(it, aiml)
                 }
-                .flatten()
-                .flatten()
-                .forEach {
-                    val args = it.pattern.split(" ")
-                    val pattern = args[0]
-                    val node = nodes[pattern] ?: Node(
-                        pattern
-                    ).also { node ->
-                        nodes[pattern] = node
-                    }
-                    val (last, parent) = buildNodeTree(node, null, args, args.indices, 0)
-                    val lastCopy = last.copy(
-                        template = it.template,
-                        commands = it.commands ?: emptyList()
-                    )
-                    if (parent == null) {
-                        nodes[pattern] = lastCopy
+            }.flatten().flatten().forEach {
+                val args = it.pattern.split(" ")
+                val pattern = args[0]
+                val node = nodes[pattern] ?: Node(
+                    pattern
+                ).also { node ->
+                    nodes[pattern] = node
+                }
+                val (currentNode, parentNode) = buildNodeTree(node, null, args, args.indices, 0)
+                currentNode.copy(
+                    template = it.template, commands = it.commands ?: emptyList()
+                ).also { also ->
+                    if (parentNode == null) {
+                        nodes[pattern] = also
                     } else {
-                        parent[lastCopy.pattern] = lastCopy
+                        parentNode[also.pattern] = also
                     }
                 }
+            }
 
             return NodeManager(nodes, templatePostNodeProcessor, commandPostProcessor)
         }

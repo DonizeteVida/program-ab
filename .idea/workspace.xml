@@ -6,13 +6,6 @@
   <component name="ChangeListManager">
     <list default="true" id="692fe77d-b9a7-404e-8837-aec1aa54677c" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/bots/jarvis/hello.json" beforeDir="false" afterPath="$PROJECT_DIR$/bots/jarvis/hello.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/kotlin/base/processor/NodeManager.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/kotlin/base/processor/NodeManager.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/kotlin/base/processor/template/GetFallbackRegexTemplatePostProcessor.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/kotlin/base/processor/template/GetFallbackRegexTemplatePostProcessor.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/kotlin/base/processor/template/GetRegexTemplatePostProcessor.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/kotlin/base/processor/template/GetRegexTemplatePostProcessor.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/kotlin/base/processor/template/PatternRegexTemplatePostProcessor.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/kotlin/base/processor/template/PatternRegexTemplatePostProcessor.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/kotlin/base/processor/template/SraiRegexTemplatePostProcessor.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/kotlin/base/processor/template/SraiRegexTemplatePostProcessor.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/kotlin/base/processor/template/StarRegexTemplatePostProcessor.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/kotlin/base/processor/template/StarRegexTemplatePostProcessor.kt" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
