@@ -12,6 +12,6 @@ data class Node(
         children[index] = node
     }
 
-    val isWildCard: Boolean
+    val isWildCard
         get() = "*" == pattern
 }

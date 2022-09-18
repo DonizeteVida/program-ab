@@ -29,14 +29,19 @@ class NodeManager private constructor(
     }
 
     private fun internalFind(args: List<String>, stack: Stack): Node? {
-        val pattern = args[0]
+        val arg = args[0]
         val indices = args.indices
-        val node = nodes[pattern] ?: nodes["*"] ?: throw IllegalStateException("A default response must be provided")
-        return findLastNode(node, pattern, args, stack, indices, 0)
+        val node = nodes[arg] ?: nodes["*"] ?: throw IllegalStateException("A default response must be provided")
+        return findLastNode(node, arg, args, stack, indices, 0)
     }
 
     private fun findLastNode(
-        node: Node, arg: String, args: List<String>, stack: Stack, indices: IntRange, cursor: Int
+        node: Node,
+        arg: String,
+        args: List<String>,
+        stack: Stack,
+        indices: IntRange,
+        cursor: Int
     ): Node? {
         val nextCursor = cursor + 1
         val hasNextArg = nextCursor in indices
@@ -88,7 +93,7 @@ class NodeManager private constructor(
             return buildNodeTree(nextNode, currentNode, args, indices, nextCursor)
         }
 
-        private fun expandCategoryIfNecessary(category: Category, aiml: Aiml): List<Category> {
+        private fun expandSetPattern(category: Category, aiml: Aiml): List<Category> {
             //Sorry gods of code optimization
             //I, honestly, don't know how to make it better
             val pattern = category.pattern
@@ -124,8 +129,10 @@ class NodeManager private constructor(
             data.map(Aiml::variables).forEach(memory.variables::putAll)
 
             data.map { aiml ->
-                aiml.categories.map {
-                    expandCategoryIfNecessary(it, aiml)
+                aiml.categories.filter {
+                    it.that == null
+                }.map {
+                    expandSetPattern(it, aiml)
                 }
             }.flatten().flatten().forEach {
                 val args = it.pattern.split(" ")
