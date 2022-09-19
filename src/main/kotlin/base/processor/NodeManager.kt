@@ -29,53 +29,35 @@ class NodeManager private constructor(
     }
 
     private fun internalFind(args: List<String>, stack: Stack): Node? {
-        val arg = args[0]
         val indices = args.indices
-        val node = nodes[arg] ?: nodes["*"] ?: throw IllegalStateException("A default response must be provided")
-        return findLastNode(node, arg, args, stack, indices, 0)
-    }
 
-    private fun findLastNode(
-        node: Node,
-        arg: String,
-        args: List<String>,
-        stack: Stack,
-        indices: IntRange,
-        cursor: Int
-    ): Node? {
-        val nextCursor = cursor + 1
-        val hasNextArg = nextCursor in indices
-        if (node.isWildCard) {
-            if (hasNextArg) {
-                //wild card lookahead logic
-                val wildMatches = arrayListOf(arg)
-                var wildCursor = cursor + 1
-                var nextArg = args[wildCursor]
-                var nextNode = node[nextArg]
-                //if next node equals null
-                //we should use current nextArg as wild matching argument
-                while (nextNode == null) {
-                    wildMatches += nextArg
-                    if (++wildCursor !in indices) break
-                    nextArg = args[wildCursor]
-                    nextNode = node[nextArg]
+        var cursor = 0
+        var last: Node? = null
+
+        while (cursor in indices) {
+            val arg = args[cursor++]
+            val current = last?.get(arg) ?: last?.get("*") ?: nodes[arg] ?: nodes["*"] ?: return null
+            last = current
+            if (current.isWildCard) {
+                //lookahead logic
+                val matches = arrayListOf(arg)
+                while (cursor in indices) {
+                    val lookahead = args[cursor++]
+                    val node = current[lookahead] ?: current["*"]
+                    if (node != null) {
+                        last = node
+                        break
+                    }
+                    matches += lookahead
                 }
-                val actualArg = wildMatches.joinToString(" ")
-                stack.star += actualArg
-                stack.pattern += actualArg
-                return if (nextNode == null) {
-                    node
-                } else {
-                    findLastNode(nextNode, nextArg, args, stack, indices, wildCursor)
-                }
+                val match = matches.joinToString(" ")
+                stack.star += match
+                stack.pattern += match
+            } else {
+                stack.pattern += arg
             }
-            stack.star += arg
         }
-        stack.pattern += arg
-        if (!hasNextArg) return node
-        val nextArg = args[nextCursor]
-        val nextNode = node[nextArg] ?: node["*"] ?: return null
-        return findLastNode(nextNode, nextArg, args, stack, indices, nextCursor)
+        return last
     }
 
     companion object {
@@ -85,27 +67,21 @@ class NodeManager private constructor(
         ) {
             val args = category.pattern.split(" ")
             val indices = args.indices
+
             var cursor = 0
             var arg = args[cursor]
-            var prev = nodes[arg]
-            while (++cursor in indices) {
-                if (prev == null) {
-                    val next = Node(arg)
-                    nodes[arg] = next
-                    prev = next
-                } else {
-                    var next = prev[arg]
-                    if (next == null) {
-                        next = Node(arg)
-                        prev[arg] = next
-                    }
-                    prev = next
-                }
-                arg = args[cursor]
+            var prev = nodes[arg]?: Node(arg, "").also {
+                nodes[arg] = it
             }
-            val next = Node(arg, category.template)
-            if (prev == null) throw IllegalStateException("Node tree not built properly")
-            prev[arg] = next
+            while (++cursor in indices) {
+                arg = args[cursor]
+                prev = prev[arg] ?: Node(
+                    arg,
+                    if (cursor + 1 in indices) "" else category.template
+                ).also {
+                    prev[arg] = it
+                }
+            }
         }
 
         private fun expandSetPattern(category: Category, aiml: Aiml): List<Category> {
