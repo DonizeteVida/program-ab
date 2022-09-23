@@ -6,8 +6,6 @@
   <component name="ChangeListManager">
     <list default="true" id="692fe77d-b9a7-404e-8837-aec1aa54677c" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/kotlin/base/Node.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/kotlin/base/Node.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/kotlin/base/processor/NodeManager.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/kotlin/base/processor/NodeManager.kt" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -119,6 +117,11 @@
           <url>file://$PROJECT_DIR$/src/main/kotlin/base/processor/command/AssignRegexCommandPostProcessor.kt</url>
           <line>14</line>
           <option name="timeStamp" value="4" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="kotlin-line">
+          <url>file://$PROJECT_DIR$/src/main/kotlin/base/processor/NodeManager.kt</url>
+          <line>150</line>
+          <option name="timeStamp" value="5" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>
