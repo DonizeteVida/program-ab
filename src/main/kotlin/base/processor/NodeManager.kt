@@ -9,12 +9,13 @@ import base.processor.template.TemplatePostProcessor
 import base.regex.RegexPattern
 import parser.json.Aiml
 import parser.json.Category
+import java.util.function.Supplier
 
 class NodeManager private constructor(
     private val nodes: HashMap<String, Node> = hashMapOf(),
     private val templatePostNodeProcessor: NodeProcessor<TemplatePostProcessor.Result>,
     private val commandPostNodeProcessor: NodeProcessor<Unit>
-) : Fork<NodeManager> {
+) : Supplier<NodeManager> {
     fun find(pattern: String): String {
         val args = pattern.split(" ")
         if (args.isEmpty()) throw IllegalStateException("A pattern must be provided")
@@ -152,7 +153,7 @@ class NodeManager private constructor(
         }
     }
 
-    override fun fork(): NodeManager {
+    override fun get(): NodeManager {
         val memory = Memory()
         val templatePostNodeProcessor = TemplatePostNodeProcessorImpl(memory)
         val commandPostProcessor = CommandPostNodeProcessorImpl(memory)
