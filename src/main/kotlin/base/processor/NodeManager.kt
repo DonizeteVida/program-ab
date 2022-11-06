@@ -1,6 +1,5 @@
 package base.processor
 
-import base.Node
 import base.KnowledgeNode
 import base.memory.Memory
 import base.memory.Stack
@@ -57,10 +56,101 @@ class NodeManager private constructor(
             stack.pattern += arg
             return node
         }
+        if (node.isWildCard) {
+            return internalLookahead(
+                node,
+                arg,
+                indices,
+                nextOffset,
+                args,
+                stack
+            )
+        }
         stack.pattern += arg
         val nextArg = args[nextOffset]
         val nextNode = node[nextArg] ?: node["*"] ?: return null
         return internalTailRecFind(nextNode, nextArg, indices, nextOffset = nextOffset + 1, args, stack)
+    }
+
+    data class LookaheadResult(
+        val node: KnowledgeNode?,
+        val arg: String?,
+        val nextOffset: Int,
+        val lookaheadArgs: ArrayList<String>
+    )
+
+    private fun internalLookahead(
+        node: KnowledgeNode,
+        arg: String,
+        indices: IntRange,
+        nextOffset: Int,
+        args: List<String>,
+        stack: Stack
+    ): KnowledgeNode? {
+        val (node, arg, nextOffset, lookaheadArgs) = internalTailRecLookahead(
+            node,
+            arg,
+            indices,
+            nextOffset,
+            args,
+            stack,
+            lookaheadArgs = ArrayList(args.size)
+        )
+        val join = lookaheadArgs.joinToString(" ")
+        stack.pattern += join
+        stack.star += join
+        if (nextOffset !in indices || arg == null) return node
+        if (node == null) return null
+        return internalTailRecFind(
+            node,
+            arg,
+            indices,
+            nextOffset = nextOffset,
+            args,
+            stack
+        )
+    }
+
+    private tailrec fun internalTailRecLookahead(
+        node: KnowledgeNode,
+        arg: String,
+        indices: IntRange,
+        nextOffset: Int,
+        args: List<String>,
+        stack: Stack,
+        lookaheadArgs: ArrayList<String>
+    ): LookaheadResult {
+        if (!node.isWildCard) return LookaheadResult(
+            node,
+            arg,
+            nextOffset,
+            lookaheadArgs
+        )
+        val next = node[arg] ?: node["*"]
+        if (next == null) {
+            lookaheadArgs += arg
+            if (nextOffset !in indices) return LookaheadResult(
+                node,
+                null,
+                nextOffset,
+                lookaheadArgs
+            )
+            return internalTailRecLookahead(
+                node,
+                args[nextOffset],
+                indices,
+                nextOffset = nextOffset + 1,
+                args,
+                stack,
+                lookaheadArgs
+            )
+        }
+        return LookaheadResult(
+            next,
+            arg,
+            nextOffset,
+            lookaheadArgs
+        )
     }
 
     companion object {
