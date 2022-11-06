@@ -1,7 +1,7 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
-    kotlin("jvm") version "1.7.10"
+    kotlin("jvm") version "1.7.20"
     application
 }
 
@@ -13,7 +13,7 @@ repositories {
 }
 
 dependencies {
-    implementation("com.google.code.gson:gson:2.9.1")
+    implementation("com.google.code.gson:gson:2.10")
     testImplementation(kotlin("test"))
 }
 
