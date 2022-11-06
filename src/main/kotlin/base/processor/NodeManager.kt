@@ -52,10 +52,6 @@ class NodeManager private constructor(
         args: List<String>,
         stack: Stack
     ): KnowledgeNode? {
-        if (nextOffset !in indices) {
-            stack.pattern += arg
-            return node
-        }
         if (node.isWildCard) {
             return internalLookahead(
                 node,
@@ -65,6 +61,10 @@ class NodeManager private constructor(
                 args,
                 stack
             )
+        }
+        if (nextOffset !in indices) {
+            stack.pattern += arg
+            return node
         }
         stack.pattern += arg
         val nextArg = args[nextOffset]
