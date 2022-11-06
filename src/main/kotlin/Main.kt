@@ -8,7 +8,6 @@ import java.io.FileInputStream
 import java.util.*
 
 fun main(args: Array<String>) {
-    println("Hello World!")
     val parser: Parser<Aiml> = JSONParseImpl(Aiml::class)
     val files = File("./bots/jarvis/").listFiles() ?: emptyArray()
     val data = files.map(::FileInputStream).use(parser::parse)

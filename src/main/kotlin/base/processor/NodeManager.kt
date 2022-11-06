@@ -14,7 +14,7 @@ class NodeManager private constructor(
     private val nodes: HashMap<String, Node> = hashMapOf(),
     private val templatePostNodeProcessor: NodeProcessor<TemplatePostProcessor.Result>,
     private val commandPostNodeProcessor: NodeProcessor<Unit>
-) {
+) : Fork<NodeManager> {
     fun find(pattern: String): String {
         val args = pattern.split(" ")
         if (args.isEmpty()) throw IllegalStateException("A pattern must be provided")
@@ -150,5 +150,12 @@ class NodeManager private constructor(
 
             return NodeManager(nodes, templatePostNodeProcessor, commandPostProcessor)
         }
+    }
+
+    override fun fork(): NodeManager {
+        val memory = Memory()
+        val templatePostNodeProcessor = TemplatePostNodeProcessorImpl(memory)
+        val commandPostProcessor = CommandPostNodeProcessorImpl(memory)
+        return NodeManager(nodes, templatePostNodeProcessor, commandPostProcessor)
     }
 }
