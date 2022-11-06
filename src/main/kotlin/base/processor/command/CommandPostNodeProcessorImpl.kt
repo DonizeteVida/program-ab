@@ -1,6 +1,6 @@
 package base.processor.command
 
-import base.Node
+import base.KnowledgeNode
 import base.memory.Memory
 import base.memory.Stack
 import base.processor.NodeProcessor
@@ -13,7 +13,7 @@ class CommandPostNodeProcessorImpl(
         ::AssignRegexCommandPostProcessor
     )
 
-    override fun invoke(node: Node, stack: Stack) {
+    override fun invoke(node: KnowledgeNode, stack: Stack) {
         for (command in node.commands) {
             val builder = StringBuilder(command)
             processors.map {

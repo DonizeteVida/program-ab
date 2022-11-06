@@ -1,6 +1,7 @@
 package base.processor
 
 import base.Node
+import base.KnowledgeNode
 import base.memory.Memory
 import base.memory.Stack
 import base.processor.command.CommandPostNodeProcessorImpl
@@ -12,10 +13,18 @@ import parser.json.Category
 import java.util.function.Supplier
 
 class NodeManager private constructor(
-    private val nodes: HashMap<String, Node> = hashMapOf(),
+    private val nodes: HashMap<String, KnowledgeNode>,
     private val templatePostNodeProcessor: NodeProcessor<TemplatePostProcessor.Result>,
     private val commandPostNodeProcessor: NodeProcessor<Unit>
 ) : Supplier<NodeManager> {
+
+    override fun get(): NodeManager {
+        val memory = Memory()
+        val templatePostNodeProcessor = TemplatePostNodeProcessorImpl(memory)
+        val commandPostProcessor = CommandPostNodeProcessorImpl(memory)
+        return NodeManager(nodes, templatePostNodeProcessor, commandPostProcessor)
+    }
+
     fun find(pattern: String): String {
         val args = pattern.split(" ")
         if (args.isEmpty()) throw IllegalStateException("A pattern must be provided")
@@ -29,24 +38,23 @@ class NodeManager private constructor(
         }
     }
 
-    private fun internalFind(args: List<String>, stack: Stack): Node? {
+    private tailrec fun internalFind(args: List<String>, stack: Stack): KnowledgeNode? {
         val indices = args.indices
 
         var cursor = 0
-        var last: Node? = null
+        var node = nodes[args[cursor++]] ?: nodes["*"] ?: return null
 
         while (cursor in indices) {
             val arg = args[cursor++]
-            val current = last?.get(arg) ?: last?.get("*") ?: nodes[arg] ?: nodes["*"] ?: return null
-            last = current
-            if (current.isWildCard) {
+            node = node[arg] ?: node["*"] ?: return null
+            if (node.isWildCard) {
                 //lookahead logic
                 val matches = arrayListOf(arg)
                 while (cursor in indices) {
                     val lookahead = args[cursor++]
-                    val node = current[lookahead] ?: current["*"]
-                    if (node != null) {
-                        last = node
+                    val next = node[lookahead] ?: node["*"]
+                    if (next != null) {
+                        node = next
                         break
                     }
                     matches += lookahead
@@ -58,12 +66,12 @@ class NodeManager private constructor(
                 stack.pattern += arg
             }
         }
-        return last
+        return node
     }
 
     companion object {
         private fun buildNodeTree(
-            nodes: MutableMap<String, Node>,
+            nodes: MutableMap<String, KnowledgeNode>,
             category: Category
         ) {
             val args = category.pattern.split(" ")
@@ -71,12 +79,12 @@ class NodeManager private constructor(
 
             var cursor = 0
             var arg = args[cursor]
-            var prev = nodes[arg]?: Node(arg, "").also {
+            var prev = nodes[arg]?: KnowledgeNode(arg, "").also {
                 nodes[arg] = it
             }
             while (++cursor in indices) {
                 arg = args[cursor]
-                prev = prev[arg] ?: Node(
+                prev = prev[arg] ?: KnowledgeNode(
                     arg,
                     if (cursor + 1 in indices) "" else category.template
                 ).also {
@@ -112,14 +120,14 @@ class NodeManager private constructor(
             }
         }
 
-        fun findThatNode(that: String, thats: List<String>, indices: IntRange, cursor: Int): Node? {
+        fun findThatNode(that: String, thats: List<String>, indices: IntRange, cursor: Int): KnowledgeNode? {
 
             return null
         }
 
         fun build(data: List<Aiml>): NodeManager {
-            val thats = hashMapOf<String, Node>()
-            val nodes = hashMapOf<String, Node>()
+            val thats = hashMapOf<String, KnowledgeNode>()
+            val nodes = hashMapOf<String, KnowledgeNode>()
             val memory = Memory()
             val templatePostNodeProcessor = TemplatePostNodeProcessorImpl(memory)
             val commandPostProcessor = CommandPostNodeProcessorImpl(memory)
@@ -151,12 +159,5 @@ class NodeManager private constructor(
 
             return NodeManager(nodes, templatePostNodeProcessor, commandPostProcessor)
         }
-    }
-
-    override fun get(): NodeManager {
-        val memory = Memory()
-        val templatePostNodeProcessor = TemplatePostNodeProcessorImpl(memory)
-        val commandPostProcessor = CommandPostNodeProcessorImpl(memory)
-        return NodeManager(nodes, templatePostNodeProcessor, commandPostProcessor)
     }
 }
