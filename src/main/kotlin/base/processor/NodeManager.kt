@@ -13,15 +13,16 @@ import java.util.function.Supplier
 
 class NodeManager private constructor(
     private val nodes: HashMap<String, KnowledgeNode>,
+    private val memory: Memory,
     private val templatePostNodeProcessor: NodeProcessor<TemplatePostProcessor.Result>,
     private val commandPostNodeProcessor: NodeProcessor<Unit>
 ) : Supplier<NodeManager> {
 
     override fun get(): NodeManager {
-        val memory = Memory()
+        val memory = memory.get()
         val templatePostNodeProcessor = TemplatePostNodeProcessorImpl(memory)
         val commandPostProcessor = CommandPostNodeProcessorImpl(memory)
-        return NodeManager(nodes, templatePostNodeProcessor, commandPostProcessor)
+        return NodeManager(nodes, memory, templatePostNodeProcessor, commandPostProcessor)
     }
 
     fun find(pattern: String): String {
@@ -216,7 +217,7 @@ class NodeManager private constructor(
             val templatePostNodeProcessor = TemplatePostNodeProcessorImpl(memory)
             val commandPostProcessor = CommandPostNodeProcessorImpl(memory)
 
-            data.map(Aiml::variables).forEach(memory.variables::putAll)
+            data.map(Aiml::variables).forEach(memory.initial::putAll)
 
             data.map { aiml ->
                 aiml.categories.filter {
@@ -241,7 +242,7 @@ class NodeManager private constructor(
                 }
             }
 
-            return NodeManager(nodes, templatePostNodeProcessor, commandPostProcessor)
+            return NodeManager(nodes, memory, templatePostNodeProcessor, commandPostProcessor)
         }
     }
 }

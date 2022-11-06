@@ -12,6 +12,6 @@ class GetRegexTemplatePostProcessor(
 ) {
     override fun onMatch(matchResult: MatchResult): String {
         val name = matchResult.groups[1]!!.value
-        return memory.variables[name] ?: throw IllegalStateException("Variable $name not found in $memory")
+        return memory[name] ?: throw IllegalStateException("Variable $name not found in $memory")
     }
 }

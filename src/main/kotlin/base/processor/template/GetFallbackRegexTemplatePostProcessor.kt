@@ -13,7 +13,7 @@ class GetFallbackRegexTemplatePostProcessor(
     override fun onMatch(matchResult: MatchResult): String {
         val variable1 = matchResult.groups[1]!!.value
         val variable2 = matchResult.groups[2]!!.value
-        return memory.variables[variable1] ?: memory.variables[variable2]
+        return memory[variable1] ?: memory[variable2]
         ?: throw IllegalStateException("Variable $variable1 neither $variable2 weren't found in $memory")
     }
 }

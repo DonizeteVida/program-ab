@@ -13,7 +13,7 @@ class AssignRegexCommandPostProcessor(
     override fun onMatch(matchResult: MatchResult): String {
         val variable = matchResult.groups[1]!!.value
         val value = matchResult.groups[2]!!.value
-        memory.variables[variable] = value
+        memory[variable] = value
         return ""
     }
 }
