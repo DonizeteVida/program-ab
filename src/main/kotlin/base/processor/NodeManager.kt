@@ -161,21 +161,59 @@ class NodeManager private constructor(
         ) {
             val args = category.pattern.split(" ")
             val indices = args.indices
+            buildTailRecNodeTree(
+                nodes,
+                node = null,
+                category,
+                args,
+                args[0],
+                indices,
+                nextOffset = 1
+            )
+        }
 
-            var cursor = 0
-            var arg = args[cursor]
-            var prev = nodes[arg]?: KnowledgeNode(arg, "").also {
-                nodes[arg] = it
-            }
-            while (++cursor in indices) {
-                arg = args[cursor]
-                prev = prev[arg] ?: KnowledgeNode(
-                    arg,
-                    if (cursor + 1 in indices) "" else category.template
+        private tailrec fun buildTailRecNodeTree(
+            nodes: MutableMap<String, KnowledgeNode>,
+            node: KnowledgeNode?,
+            category: Category,
+            args: List<String>,
+            arg: String,
+            indices: IntRange,
+            nextOffset: Int
+        ) {
+            if (nextOffset !in indices) {
+                KnowledgeNode(
+                    pattern = arg,
+                    template = category.template,
+                    commands = category.commands ?: emptyList()
                 ).also {
-                    prev[arg] = it
+                    if (node != null) {
+                        node[arg] = it
+                    } else {
+                        nodes[arg] = it
+                    }
+                }
+                return
+            }
+            val node = node?.get(arg) ?: nodes[arg] ?: KnowledgeNode(
+                arg,
+                ""
+            ).also {
+                if (node != null) {
+                    node[arg] = it
+                } else {
+                    nodes[arg] = it
                 }
             }
+            return buildTailRecNodeTree(
+                nodes,
+                node,
+                category,
+                args,
+                arg = args[nextOffset],
+                indices,
+                nextOffset = nextOffset + 1
+            )
         }
 
         private fun expandSetPattern(category: Category, aiml: Aiml): List<Category> {
