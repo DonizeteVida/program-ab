@@ -38,35 +38,29 @@ class NodeManager private constructor(
         }
     }
 
-    private tailrec fun internalFind(args: List<String>, stack: Stack): KnowledgeNode? {
+    private fun internalFind(args: List<String>, stack: Stack): KnowledgeNode? {
         val indices = args.indices
+        val arg = args[0]
+        val node = nodes[arg] ?: nodes["*"] ?: return null
+        return internalTailRecFind(node, arg, indices, nextOffset = 1, args, stack)
+    }
 
-        var cursor = 0
-        var node = nodes[args[cursor++]] ?: nodes["*"] ?: return null
-
-        while (cursor in indices) {
-            val arg = args[cursor++]
-            node = node[arg] ?: node["*"] ?: return null
-            if (node.isWildCard) {
-                //lookahead logic
-                val matches = arrayListOf(arg)
-                while (cursor in indices) {
-                    val lookahead = args[cursor++]
-                    val next = node[lookahead] ?: node["*"]
-                    if (next != null) {
-                        node = next
-                        break
-                    }
-                    matches += lookahead
-                }
-                val match = matches.joinToString(" ")
-                stack.star += match
-                stack.pattern += match
-            } else {
-                stack.pattern += arg
-            }
+    private tailrec fun internalTailRecFind(
+        node: KnowledgeNode,
+        arg: String,
+        indices: IntRange,
+        nextOffset: Int,
+        args: List<String>,
+        stack: Stack
+    ): KnowledgeNode? {
+        if (nextOffset !in indices) {
+            stack.pattern += arg
+            return node
         }
-        return node
+        stack.pattern += arg
+        val nextArg = args[nextOffset]
+        val nextNode = node[nextArg] ?: node["*"] ?: return null
+        return internalTailRecFind(nextNode, nextArg, indices, nextOffset = nextOffset + 1, args, stack)
     }
 
     companion object {
