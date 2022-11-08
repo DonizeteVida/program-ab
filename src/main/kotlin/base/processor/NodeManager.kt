@@ -188,20 +188,24 @@ class NodeManager private constructor(
                     commands = category.commands ?: emptyList()
                 ).also {
                     if (node != null) {
+                        node[arg]?.apply(it::plusAssign)
                         node[arg] = it
                     } else {
+                        nodes[arg]?.apply(it::plusAssign)
                         nodes[arg] = it
                     }
                 }
                 return
             }
-            val node = node?.get(arg) ?: nodes[arg] ?: KnowledgeNode(
+            val node = (if (node != null) node[arg] else nodes[arg]) ?: KnowledgeNode(
                 arg,
                 ""
             ).also {
                 if (node != null) {
+                    node[arg]?.apply(it::plusAssign)
                     node[arg] = it
                 } else {
+                    nodes[arg]?.apply(it::plusAssign)
                     nodes[arg] = it
                 }
             }

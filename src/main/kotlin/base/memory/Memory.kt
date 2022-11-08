@@ -7,6 +7,7 @@ data class Memory(
     val dynamic: HashMap<String, String> = hashMapOf()
 ) : Supplier<Memory> {
     operator fun get(index: String) = dynamic[index] ?: initial[index]
+
     operator fun set(index: String, value: String) {
         dynamic[index] = value
     }
