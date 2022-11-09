@@ -12,7 +12,8 @@ class DefaultNodeManager constructor(
     private val nodes: HashMap<String, KnowledgeNode>,
     private val memory: Memory,
     private val templatePostNodeProcessor: NodeProcessor<TemplatePostProcessor.Result>,
-    private val commandPostNodeProcessor: NodeProcessor<Unit>
+    private val commandPostNodeProcessor: NodeProcessor<Unit>,
+    private val history: ArrayList<KnowledgeNode> = arrayListOf()
 ) : Supplier<DefaultNodeManager> {
 
     override fun get(): DefaultNodeManager {
@@ -27,6 +28,7 @@ class DefaultNodeManager constructor(
         if (args.isEmpty()) throw IllegalStateException("A pattern must be provided")
         val stack = Stack()
         val node = internalFind(args, stack) ?: throw IllegalStateException("Partial matching not implemented yet")
+        history.add(node)
         commandPostNodeProcessor(node, stack)
         return when (val result = templatePostNodeProcessor(node, stack)) {
             is TemplatePostProcessor.Result.Finish -> result.string
@@ -38,7 +40,12 @@ class DefaultNodeManager constructor(
     private fun internalFind(args: List<String>, stack: Stack): KnowledgeNode? {
         val indices = args.indices
         val arg = args[0]
-        val node = nodes[arg] ?: nodes["*"] ?: return null
+        val last = history.lastOrNull()
+        val node = if (last != null) {
+            last.contextualNodes[arg] ?: last.contextualNodes["*"] ?: nodes[arg] ?: nodes["*"]
+        } else {
+            nodes[arg] ?: nodes["*"]
+        } ?: return null
         return internalTailRecFind(node, arg, indices, nextOffset = 1, args, stack)
     }
 
