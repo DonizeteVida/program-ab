@@ -1,6 +1,6 @@
 package parser.json
 
-data class Aiml(
+data class Knowledge(
     val description: String = "",
     val incompletePattern: String = "",
     val variables: Map<String, String> = emptyMap(),
@@ -9,8 +9,13 @@ data class Aiml(
 )
 
 data class Category(
+    val id: String?,
     val pattern: String,
     val template: String,
     val commands: List<String>?,
-    val that: String?
+    val context: Context?
+)
+
+data class Context(
+    val id: String
 )
