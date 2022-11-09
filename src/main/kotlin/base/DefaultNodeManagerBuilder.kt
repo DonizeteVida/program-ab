@@ -9,11 +9,12 @@ import parser.json.Knowledge
 
 object DefaultNodeManagerBuilder {
     private fun buildNodeTree(
-        nodeManager: NodeManager<KnowledgeNode>, category: Category
-    ) {
+        nodeManager: NodeManager<KnowledgeNode>,
+        category: Category
+    ) : KnowledgeNode {
         val args = category.pattern.split(" ")
         val indices = args.indices
-        buildTailRecNodeTree(
+        return buildTailRecNodeTree(
             nodeManager, category, args, args[0], indices, nextOffset = 1
         )
     }
@@ -25,15 +26,16 @@ object DefaultNodeManagerBuilder {
         arg: String,
         indices: IntRange,
         nextOffset: Int
-    ) {
+    ): KnowledgeNode {
         if (nextOffset !in indices) {
-            KnowledgeNode(
-                pattern = arg, template = category.template, commands = category.commands ?: emptyList()
+            return KnowledgeNode(
+                pattern = arg,
+                template = category.template,
+                commands = category.commands ?: emptyList()
             ).also {
                 nodeManager[arg]?.apply(it::plusAssign)
                 nodeManager[arg] = it
             }
-            return
         }
         val nextNodeManager: NodeManager<KnowledgeNode> = nodeManager[arg] ?: KnowledgeNode(
             arg, ""
@@ -100,7 +102,8 @@ object DefaultNodeManagerBuilder {
                 it.context == null
             }.map { category -> category to knowledge }
         }.flatten().map { (category, knowledge) -> expandSetPattern(category, knowledge) }.flatten().forEach {
-            buildNodeTree(nodesManager, it)
+            val node = buildNodeTree(nodesManager, it)
+            contextual[it.template + it.id] = node
         }
 
         knowledges.map { knowledge ->
@@ -108,8 +111,13 @@ object DefaultNodeManagerBuilder {
                 it.context != null
             }.map { category -> category to knowledge }
         }.flatten().map { (category, knowledge) -> expandSetPattern(category, knowledge) }.flatten().forEach {
-            buildNodeTree(nodesManager, it)
+            val context = it.context ?: throw IllegalStateException("Context is null")
+            val node = contextual[context.template + context.id] ?: throw IllegalStateException("Contextual parent node not found")
+            val newNode = buildNodeTree(NodesNodeManager(node.contextualNodes), it)
+            contextual[it.template + it.id] = newNode
         }
+
+        contextual.clear()
 
         return DefaultNodeManager(
             nodes,

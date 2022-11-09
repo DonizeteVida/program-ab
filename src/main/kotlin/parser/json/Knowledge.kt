@@ -12,10 +12,11 @@ data class Category(
     val id: String?,
     val pattern: String,
     val template: String,
+    val context: Context?,
     val commands: List<String>?,
-    val context: Context?
 )
 
 data class Context(
-    val id: String
+    val id: String?,
+    val template: String
 )
