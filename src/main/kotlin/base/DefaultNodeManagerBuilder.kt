@@ -92,8 +92,6 @@ object DefaultNodeManagerBuilder {
         val nodes = hashMapOf<String, KnowledgeNode>()
         val nodesManager = NodesNodeManager(nodes)
         val memory = Memory()
-        val templatePostNodeProcessor = TemplatePostNodeProcessorImpl(memory)
-        val commandPostProcessor = CommandPostNodeProcessorImpl(memory)
 
         knowledges.map(Knowledge::variables).forEach(memory.initial::putAll)
 
@@ -113,6 +111,11 @@ object DefaultNodeManagerBuilder {
             buildNodeTree(nodesManager, it)
         }
 
-        return DefaultNodeManager(nodes, memory, templatePostNodeProcessor, commandPostProcessor)
+        return DefaultNodeManager(
+            nodes,
+            memory,
+            TemplatePostNodeProcessorImpl(memory),
+            CommandPostNodeProcessorImpl(memory)
+        )
     }
 }
