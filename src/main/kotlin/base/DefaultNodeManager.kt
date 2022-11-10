@@ -1,5 +1,6 @@
 package base
 
+import base.Node.Complete
 import base.memory.Memory
 import base.memory.Stack
 import base.processor.NodeProcessor
@@ -9,12 +10,14 @@ import base.processor.template.TemplatePostProcessor
 import java.util.function.Supplier
 
 class DefaultNodeManager constructor(
-    private val nodes: HashMap<String, KnowledgeNode>,
+    private val nodes: HashMap<String, Node>,
     private val memory: Memory,
     private val templatePostNodeProcessor: NodeProcessor<TemplatePostProcessor.Result>,
     private val commandPostNodeProcessor: NodeProcessor<Unit>,
-    private val history: ArrayList<KnowledgeNode> = arrayListOf()
+    private val history: ArrayList<Complete> = arrayListOf()
 ) : Supplier<DefaultNodeManager> {
+
+    private fun String.isWildCard() = this == "*"
 
     override fun get(): DefaultNodeManager {
         val memory = memory.get()
@@ -37,27 +40,27 @@ class DefaultNodeManager constructor(
         }
     }
 
-    private fun internalFind(args: List<String>, stack: Stack): KnowledgeNode? {
+    private fun internalFind(args: List<String>, stack: Stack): Complete? {
         val indices = args.indices
         val arg = args[0]
         val last = history.lastOrNull()
         val node = if (last != null) {
-            last.contextualNodes[arg] ?: last.contextualNodes["*"] ?: nodes[arg] ?: nodes["*"]
+            last.context[arg] ?: last.context["*"] ?: nodes[arg] ?: nodes["*"]
         } else {
             nodes[arg] ?: nodes["*"]
         } ?: return null
-        return internalTailRecFind(node, arg, indices, nextOffset = 1, args, stack)
+        return internalTailRecFind(node, arg, indices, nextOffset = 1, args, stack) as Complete?
     }
 
     private tailrec fun internalTailRecFind(
-        node: KnowledgeNode,
+        node: Node,
         arg: String,
         indices: IntRange,
         nextOffset: Int,
         args: List<String>,
         stack: Stack
-    ): KnowledgeNode? {
-        if (node.isWildCard) {
+    ): Node? {
+        if (node is Complete && node.index.isWildCard()) {
             return internalLookahead(
                 node,
                 arg,
@@ -78,20 +81,20 @@ class DefaultNodeManager constructor(
     }
 
     data class LookaheadResult(
-        val node: KnowledgeNode?,
+        val node: Node?,
         val arg: String?,
         val nextOffset: Int,
         val lookaheadArgs: ArrayList<String>
     )
 
     private fun internalLookahead(
-        node: KnowledgeNode,
+        node: Node,
         arg: String,
         indices: IntRange,
         nextOffset: Int,
         args: List<String>,
         stack: Stack
-    ): KnowledgeNode? {
+    ): Node? {
         val (node, arg, nextOffset, lookaheadArgs) = internalTailRecLookahead(
             node,
             arg,
@@ -117,7 +120,7 @@ class DefaultNodeManager constructor(
     }
 
     private tailrec fun internalTailRecLookahead(
-        node: KnowledgeNode,
+        node: Node,
         arg: String,
         indices: IntRange,
         nextOffset: Int,
@@ -125,7 +128,7 @@ class DefaultNodeManager constructor(
         stack: Stack,
         lookaheadArgs: ArrayList<String>
     ): LookaheadResult {
-        if (!node.isWildCard) return LookaheadResult(
+        if (node !is Complete || !node.index.isWildCard()) return LookaheadResult(
             node,
             arg,
             nextOffset,

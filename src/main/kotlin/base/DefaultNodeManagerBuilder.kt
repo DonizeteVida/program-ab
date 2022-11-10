@@ -1,5 +1,6 @@
 package base
 
+import base.Node.Complete
 import base.memory.Memory
 import base.processor.command.CommandPostNodeProcessorImpl
 import base.processor.template.TemplatePostNodeProcessorImpl
@@ -9,42 +10,50 @@ import parser.json.Knowledge
 
 object DefaultNodeManagerBuilder {
     private fun buildNodeTree(
-        nodeManager: NodeManager<KnowledgeNode>,
+        node: Node,
         category: Category
-    ) : KnowledgeNode {
+    ) : Node {
         val args = category.pattern.split(" ")
         val indices = args.indices
         return buildTailRecNodeTree(
-            nodeManager, category, args, args[0], indices, nextOffset = 1
+            node,
+            category,
+            args,
+            args[0],
+            indices,
+            nextOffset = 1
         )
     }
 
     private tailrec fun buildTailRecNodeTree(
-        nodeManager: NodeManager<KnowledgeNode>,
+        node: Node,
         category: Category,
         args: List<String>,
         arg: String,
         indices: IntRange,
         nextOffset: Int
-    ): KnowledgeNode {
+    ): Node {
         if (nextOffset !in indices) {
-            return KnowledgeNode(
-                pattern = arg,
+            return Complete(
+                index = arg,
                 template = category.template,
                 commands = category.commands ?: emptyList()
             ).also {
-                nodeManager[arg]?.apply(it::plusAssign)
-                nodeManager[arg] = it
+                node[arg]?.apply(it::plusAssign)
+                node[arg] = it
             }
         }
-        val nextNodeManager: NodeManager<KnowledgeNode> = nodeManager[arg] ?: KnowledgeNode(
-            arg, ""
-        ).also {
-            nodeManager[arg]?.apply(it::plusAssign)
-            nodeManager[arg] = it
+        val node = node[arg] ?: Node.Incomplete(arg).also {
+            node[arg]?.apply(it::plusAssign)
+            node[arg] = it
         }
         return buildTailRecNodeTree(
-            nextNodeManager, category, args, arg = args[nextOffset], indices, nextOffset = nextOffset + 1
+            node,
+            category,
+            args,
+            arg = args[nextOffset],
+            indices,
+            nextOffset = nextOffset + 1
         )
     }
 
@@ -76,23 +85,26 @@ object DefaultNodeManagerBuilder {
     }
 
     //it only exists for polymorphism shit
-    private data class NodesNodeManager(
-        private val nodes: HashMap<String, KnowledgeNode>
-    ) : NodeManager<KnowledgeNode> {
+    private data class NodesNode(
+        override val nodes: HashMap<String, Node>,
+        override val index: String = ""
+    ) : Node {
         override fun get(index: String) = nodes[index]
 
-        override fun plusAssign(other: KnowledgeNode) =
-            throw IllegalStateException("Problem in Nodes graph construction")
+        override fun plusAssign(other: Node) {
+            nodes[other.index]?.apply(other::plusAssign)
+            nodes[other.index] = other
+        }
 
-        override fun set(index: String, node: KnowledgeNode) {
+        override fun set(index: String, node: Node) {
             nodes[index] = node
         }
     }
 
     fun build(knowledges: List<Knowledge>): DefaultNodeManager {
-        val contextual = hashMapOf<String, KnowledgeNode>()
-        val nodes = hashMapOf<String, KnowledgeNode>()
-        val nodesManager = NodesNodeManager(nodes)
+        val contextual = hashMapOf<String, Node>()
+        val nodes = hashMapOf<String, Node>()
+        val nodesManager = NodesNode(nodes)
         val memory = Memory()
 
         knowledges.map(Knowledge::variables).forEach(memory.initial::putAll)
@@ -112,8 +124,8 @@ object DefaultNodeManagerBuilder {
             }.map { category -> category to knowledge }
         }.flatten().map { (category, knowledge) -> expandSetPattern(category, knowledge) }.flatten().forEach {
             val context = it.context ?: throw IllegalStateException("Context is null")
-            val node = contextual[context.template + context.id] ?: throw IllegalStateException("Contextual parent node not found")
-            val newNode = buildNodeTree(NodesNodeManager(node.contextualNodes), it)
+            val node = contextual[context.template + context.id] as? Complete ?: throw IllegalStateException("Contextual parent node not found")
+            val newNode = buildNodeTree(NodesNode(node.context), it)
             contextual[it.template + it.id] = newNode
         }
 

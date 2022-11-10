@@ -1,6 +1,6 @@
 package base.processor.template
 
-import base.KnowledgeNode
+import base.Node
 import base.memory.Memory
 import base.memory.Stack
 import base.processor.NodeProcessor
@@ -17,7 +17,7 @@ class TemplatePostNodeProcessorImpl(
     )
     private val indices = transformers.indices
 
-    override operator fun invoke(node: KnowledgeNode, stack: Stack): TemplatePostProcessor.Result {
+    override operator fun invoke(node: Node.Complete, stack: Stack): TemplatePostProcessor.Result {
         val builder = StringBuilder(node.template)
         return internalTransform(builder, 0, stack)
     }

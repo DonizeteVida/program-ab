@@ -1,0 +1,13 @@
+{
+  "description": "A simple node example",
+  "categories": [
+    {
+      "pattern": "Hello",
+      "template": "Hello there"
+    },
+    {
+      "pattern": "Hello there",
+      "template": "Hello"
+    }
+  ]
+}
