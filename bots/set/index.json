@@ -1,0 +1,45 @@
+{
+  "description": "A set node example",
+  "categories": [
+    {
+      "pattern": "are you {{ set:mood }} ?",
+      "template": "No. I'm not {{ pattern:2 }}. I'm a robot."
+    },
+    {
+      "pattern": "are you * ?",
+      "template": "Sorry. I cannot recognize {{ star:0 }} as a mood"
+    },
+    {
+      "pattern": "are you alive ?",
+      "template": "No. I'm not alive"
+    },
+    {
+      "pattern": "is a color {{ set:color }} a {{ set:mood }} color ?",
+      "template": "I think it is. A {{ pattern:3 }} is really a {{ pattern:5 }} color"
+    },
+    {
+      "pattern": "is a color * a {{ set:mood }} color ?",
+      "template": "I think it isn't. A {{ star:0 }} isn't a {{ pattern:5 }} color"
+    },
+    {
+      "pattern": "is a color {{ set:color }} a * color ?",
+      "template": "Maybe. I'm not sure. A {{ pattern:3 }} could be a {{ star:0 }} color"
+    },
+    {
+      "pattern": "is a color * a * color ?",
+      "template": "Definitely not. A {{ star:0 }} color will never be a {{ star:1 }} color"
+    }
+  ],
+  "sets": {
+    "mood": [
+      "happy",
+      "sad",
+      "boring"
+    ],
+    "color": [
+      "red",
+      "blue",
+      "yellow"
+    ]
+  }
+}

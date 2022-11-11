@@ -154,7 +154,7 @@ class DefaultNodeManager constructor(
             lookaheadArgs
         )
         val next = node[arg] ?: node["*"]
-        if (next == null) {
+        return if (next == null) {
             lookaheadArgs += arg
             if (nextOffset !in indices) return LookaheadResult(
                 node,
@@ -162,7 +162,7 @@ class DefaultNodeManager constructor(
                 nextOffset,
                 lookaheadArgs
             )
-            return internalTailRecLookahead(
+            internalTailRecLookahead(
                 node,
                 args[nextOffset],
                 indices,
@@ -171,8 +171,7 @@ class DefaultNodeManager constructor(
                 stack,
                 lookaheadArgs
             )
-        }
-        return LookaheadResult(
+        } else LookaheadResult(
             next,
             arg,
             nextOffset,
