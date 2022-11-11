@@ -12,6 +12,10 @@
     {
       "pattern": "* or * ?",
       "template": "Maybe {{ star:1 }}. But {{ star:0 }} could be great too"
+    },
+    {
+      "pattern": "i'll find all money, * and gold",
+      "template": "Where will you find {{ star:0 }} ?"
     }
   ]
 }

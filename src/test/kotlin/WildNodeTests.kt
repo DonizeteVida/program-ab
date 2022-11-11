@@ -48,4 +48,20 @@ class WildNodeTests : BaseNodeTests("wild") {
         assertEquals(expectedResponse, response)
         assertEquals(expectedStack, stack)
     }
+
+    @Test
+    fun `should be able to ignore wild`() {
+        val input = "i'll find all money, and gold"
+
+        //Where will you find "" ?
+        val expectedResponse = "Where will you find  ?"
+        val expectedStack = Stack(
+            pattern = arrayListOf("i'll", "find", "all", "money,", "", "and", "gold"),
+            star = arrayListOf("")
+        )
+
+        val (response, stack) = defaultNodeManager.findTest(input)
+        assertEquals(expectedResponse, response)
+        assertEquals(expectedStack, stack)
+    }
 }
