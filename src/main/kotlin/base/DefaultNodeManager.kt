@@ -14,10 +14,11 @@ class DefaultNodeManager constructor(
     private val memory: Memory,
     private val templatePostNodeProcessor: NodeProcessor<TemplatePostProcessor.Result>,
     private val commandPostNodeProcessor: NodeProcessor<Unit>,
-    private val history: ArrayList<Complete> = arrayListOf()
+    private val history: ArrayDeque<Complete> = ArrayDeque(64)
 ) : Supplier<DefaultNodeManager> {
 
-    private fun String.isWildCard() = this == "*"
+    private val Node.isWildCard
+        get() = index == "*"
 
     override fun get(): DefaultNodeManager {
         val memory = memory.get()
@@ -26,11 +27,29 @@ class DefaultNodeManager constructor(
         return DefaultNodeManager(nodes, memory, templatePostNodeProcessor, commandPostProcessor)
     }
 
-    fun find(pattern: String): String {
-        val args = pattern.split(" ")
-        if (args.isEmpty()) throw IllegalStateException("A pattern must be provided")
+    internal data class FindClassTest(
+        val response: String,
+        val stack: Stack,
+        val node: Complete
+    )
+
+    internal fun findTest(input: String): FindClassTest {
+        val args = input.split(" ")
         val stack = Stack()
-        val node = internalFind(args, stack) ?: throw IllegalStateException("Partial matching not implemented yet")
+        val node = internalFind(args, stack) ?: throw IllegalStateException("Not found a satisfiable node for: $input")
+        history.add(node)
+        commandPostNodeProcessor(node, stack)
+        return when (val result = templatePostNodeProcessor(node, stack)) {
+            is TemplatePostProcessor.Result.Finish -> FindClassTest(result.string, stack, node)
+            is TemplatePostProcessor.Result.Rerun -> findTest(result.string)
+            is TemplatePostProcessor.Result.Success -> throw IllegalStateException("Success result should be handled internally")
+        }
+    }
+
+    fun find(input: String): String {
+        val args = input.split(" ")
+        val stack = Stack()
+        val node = internalFind(args, stack) ?: throw IllegalStateException("Not found a satisfiable node for: $input")
         history.add(node)
         commandPostNodeProcessor(node, stack)
         return when (val result = templatePostNodeProcessor(node, stack)) {
@@ -60,7 +79,7 @@ class DefaultNodeManager constructor(
         args: List<String>,
         stack: Stack
     ): Node? {
-        if (node is Complete && node.index.isWildCard()) {
+        if (node.isWildCard) {
             return internalLookahead(
                 node,
                 arg,
@@ -107,13 +126,13 @@ class DefaultNodeManager constructor(
         val join = lookaheadArgs.joinToString(" ")
         stack.pattern += join
         stack.star += join
-        if (nextOffset !in indices || arg == null) return node
         if (node == null) return null
+        if (arg == null) return node
         return internalTailRecFind(
             node,
             arg,
             indices,
-            nextOffset = nextOffset,
+            nextOffset,
             args,
             stack
         )
@@ -128,7 +147,7 @@ class DefaultNodeManager constructor(
         stack: Stack,
         lookaheadArgs: ArrayList<String>
     ): LookaheadResult {
-        if (node !is Complete || !node.index.isWildCard()) return LookaheadResult(
+        if (!node.isWildCard) return LookaheadResult(
             node,
             arg,
             nextOffset,

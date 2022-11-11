@@ -2,6 +2,10 @@
   "description": "A simple node example",
   "categories": [
     {
+      "pattern": "",
+      "template": "What do you expect I should response ?"
+    },
+    {
       "pattern": "Hello",
       "template": "Hello there"
     },

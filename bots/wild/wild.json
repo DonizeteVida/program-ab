@@ -1,0 +1,17 @@
+{
+  "description": "A wild node example",
+  "categories": [
+    {
+      "pattern": "*",
+      "template": "A default response will be provided"
+    },
+    {
+      "pattern": "* or *",
+      "template": "Why not {{ star:1 }}? {{ star:0 }} seems to be crazy"
+    },
+    {
+      "pattern": "* or * ?",
+      "template": "Maybe {{ star:1 }}. But {{ star:0 }} could be great too"
+    }
+  ]
+}

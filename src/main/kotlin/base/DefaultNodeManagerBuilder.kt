@@ -12,7 +12,7 @@ object DefaultNodeManagerBuilder {
     private fun buildNodeTree(
         node: Node,
         category: Category
-    ) : Node {
+    ): Node {
         val args = category.pattern.split(" ")
         val indices = args.indices
         return buildTailRecNodeTree(
@@ -32,22 +32,19 @@ object DefaultNodeManagerBuilder {
         arg: String,
         indices: IntRange,
         nextOffset: Int
-    ): Node {
-        if (nextOffset !in indices) {
-            return Complete(
-                index = arg,
-                template = category.template,
-                commands = category.commands ?: emptyList()
-            ).also {
-                node[arg]?.apply(it::plusAssign)
-                node[arg] = it
-            }
-        }
+    ): Node = if (nextOffset !in indices) Complete(
+        index = arg,
+        template = category.template,
+        commands = category.commands ?: emptyList()
+    ).also {
+        node[arg]?.apply(it::plusAssign)
+        node[arg] = it
+    } else {
         val node = node[arg] ?: Node.Incomplete(arg).also {
             node[arg]?.apply(it::plusAssign)
             node[arg] = it
         }
-        return buildTailRecNodeTree(
+        buildTailRecNodeTree(
             node,
             category,
             args,
@@ -124,7 +121,8 @@ object DefaultNodeManagerBuilder {
             }.map { category -> category to knowledge }
         }.flatten().map { (category, knowledge) -> expandSetPattern(category, knowledge) }.flatten().forEach {
             val context = it.context ?: throw IllegalStateException("Context is null")
-            val node = contextual[context.template + context.id] as? Complete ?: throw IllegalStateException("Contextual parent node not found")
+            val node = contextual[context.template + context.id] as? Complete
+                ?: throw IllegalStateException("Contextual parent node not found")
             val newNode = buildNodeTree(NodesNode(node.context), it)
             contextual[it.template + it.id] = newNode
         }
