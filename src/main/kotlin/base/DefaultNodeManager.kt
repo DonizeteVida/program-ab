@@ -100,7 +100,7 @@ class DefaultNodeManager constructor(
     }
 
     data class LookaheadResult(
-        val node: Node?,
+        val node: Node,
         val arg: String?,
         val nextOffset: Int,
         val lookaheadArgs: ArrayList<String>
@@ -126,7 +126,6 @@ class DefaultNodeManager constructor(
         val join = lookaheadArgs.joinToString(" ")
         stack.pattern += join
         stack.star += join
-        if (node == null) return null
         if (arg == null) return node
         return internalTailRecFind(
             node,

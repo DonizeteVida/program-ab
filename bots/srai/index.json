@@ -1,0 +1,17 @@
+{
+  "description": "A srai node example",
+  "categories": [
+    {
+      "pattern": "* or *",
+      "template": "{{ srai({{ star:0 }} or {{ star:1 }} ?) }}"
+    },
+    {
+      "pattern": "* or * ?",
+      "template": "{{ srai(can a {{ star:0 }} be a {{ star:1 }} ?) }}"
+    },
+    {
+      "pattern": "can a * be a * ?",
+      "template": "Probably not. But a {{ star:1 }} could be a {{ star:0 }}."
+    }
+  ]
+}
