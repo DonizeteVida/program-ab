@@ -5,9 +5,7 @@ import base.memory.Memory
 import base.memory.Stack
 import base.processor.NodeProcessor
 
-class TemplatePostNodeProcessorImpl(
-    private val memory: Memory
-) : NodeProcessor<TemplatePostProcessor.Result> {
+object TemplateNodeProcessor : NodeProcessor {
     private val transformers = arrayOf(
         ::StarRegexTemplatePostProcessor,
         ::PatternRegexTemplatePostProcessor,
@@ -17,19 +15,24 @@ class TemplatePostNodeProcessorImpl(
     )
     private val indices = transformers.indices
 
-    override operator fun invoke(node: Node.Complete, stack: Stack): TemplatePostProcessor.Result {
+    override operator fun invoke(node: Node.Complete, stack: Stack, memory: Memory): NodeProcessor.Action {
         val builder = StringBuilder(node.template)
-        return internalTransform(builder, 0, stack)
+        return internalTransform(builder, 0, stack, memory)
     }
 
-    private fun internalTransform(builder: StringBuilder, index: Int, stack: Stack): TemplatePostProcessor.Result =
+    private tailrec fun internalTransform(
+        builder: StringBuilder,
+        index: Int,
+        stack: Stack,
+        memory: Memory
+    ): NodeProcessor.Action =
         when (val result = transformers[index](stack, memory)(builder)) {
-            is TemplatePostProcessor.Result.Rerun -> result
-            is TemplatePostProcessor.Result.Success -> {
+            is NodeProcessor.Action.ReRun -> result
+            is NodeProcessor.Action.Success -> {
                 if (index + 1 !in indices) {
-                    TemplatePostProcessor.Result.Finish(builder.toString())
+                    NodeProcessor.Action.Success(builder.toString())
                 } else {
-                    internalTransform(builder, index + 1, stack)
+                    internalTransform(builder, index + 1, stack, memory)
                 }
             }
 

@@ -5,15 +5,13 @@ import base.memory.Memory
 import base.memory.Stack
 import base.processor.NodeProcessor
 
-class CommandPostNodeProcessorImpl(
-    private val memory: Memory
-) : NodeProcessor<Unit> {
+object CommandNodeProcessor : NodeProcessor {
     private val processors = arrayOf(
         ::StarRegexCommandPostProcessor,
         ::AssignRegexCommandPostProcessor
     )
 
-    override fun invoke(node: Node.Complete, stack: Stack) {
+    override fun invoke(node: Node.Complete, stack: Stack, memory: Memory): NodeProcessor.Action {
         for (command in node.commands) {
             val builder = StringBuilder(command)
             processors.map {
@@ -22,5 +20,6 @@ class CommandPostNodeProcessorImpl(
                 it(builder)
             }
         }
+        return NodeProcessor.Action.None
     }
 }

@@ -4,16 +4,13 @@ import base.Node.Complete
 import base.memory.Memory
 import base.memory.Stack
 import base.processor.NodeProcessor
-import base.processor.command.CommandPostNodeProcessorImpl
-import base.processor.template.TemplatePostNodeProcessorImpl
-import base.processor.template.TemplatePostProcessor
+import base.processor.command.CommandNodeProcessor
+import base.processor.template.TemplateNodeProcessor
 import java.util.function.Supplier
 
 class DefaultNodeManager constructor(
     private val nodes: HashMap<String, Node>,
     private val memory: Memory,
-    private val templatePostNodeProcessor: NodeProcessor<TemplatePostProcessor.Result>,
-    private val commandPostNodeProcessor: NodeProcessor<Unit>,
     private val history: ArrayDeque<Complete> = ArrayDeque(64)
 ) : Supplier<DefaultNodeManager> {
 
@@ -22,9 +19,7 @@ class DefaultNodeManager constructor(
 
     override fun get(): DefaultNodeManager {
         val memory = memory.get()
-        val templatePostNodeProcessor = TemplatePostNodeProcessorImpl(memory)
-        val commandPostProcessor = CommandPostNodeProcessorImpl(memory)
-        return DefaultNodeManager(nodes, memory, templatePostNodeProcessor, commandPostProcessor)
+        return DefaultNodeManager(nodes, memory)
     }
 
     internal data class FindClassTest(
@@ -38,11 +33,11 @@ class DefaultNodeManager constructor(
         val stack = Stack()
         val node = internalFind(args, stack) ?: throw IllegalStateException("Not found a satisfiable node for: $input")
         history.add(node)
-        commandPostNodeProcessor(node, stack)
-        return when (val result = templatePostNodeProcessor(node, stack)) {
-            is TemplatePostProcessor.Result.Finish -> FindClassTest(result.string, stack, node)
-            is TemplatePostProcessor.Result.Rerun -> findTest(result.string)
-            is TemplatePostProcessor.Result.Success -> throw IllegalStateException("Success result should be handled internally")
+        CommandNodeProcessor(node, stack, memory)
+        return when (val action = TemplateNodeProcessor(node, stack, memory)) {
+            is NodeProcessor.Action.Success -> FindClassTest(action.result, stack, node)
+            is NodeProcessor.Action.ReRun -> findTest(action.result)
+            else -> throw IllegalStateException("$action not properly handled")
         }
     }
 
@@ -51,12 +46,9 @@ class DefaultNodeManager constructor(
         val stack = Stack()
         val node = internalFind(args, stack) ?: throw IllegalStateException("Not found a satisfiable node for: $input")
         history.add(node)
-        commandPostNodeProcessor(node, stack)
-        return when (val result = templatePostNodeProcessor(node, stack)) {
-            is TemplatePostProcessor.Result.Finish -> result.string
-            is TemplatePostProcessor.Result.Rerun -> find(result.string)
-            is TemplatePostProcessor.Result.Success -> throw IllegalStateException("Success result should be handled internally")
-        }
+        CommandNodeProcessor(node, stack, memory)
+        val action = TemplateNodeProcessor(node, stack, memory)
+        return action(this)
     }
 
     private fun internalFind(args: List<String>, stack: Stack): Complete? {
@@ -79,16 +71,14 @@ class DefaultNodeManager constructor(
         args: List<String>,
         stack: Stack
     ): Node? {
-        if (node.isWildCard) {
-            return internalLookahead(
-                node,
-                arg,
-                indices,
-                nextOffset,
-                args,
-                stack
-            )
-        }
+        if (node.isWildCard) return internalLookahead(
+            node,
+            arg,
+            indices,
+            nextOffset,
+            args,
+            stack
+        )
         if (nextOffset !in indices) {
             stack.pattern += arg
             return node

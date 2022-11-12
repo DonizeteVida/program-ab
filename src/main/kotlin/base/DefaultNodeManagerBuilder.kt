@@ -2,8 +2,6 @@ package base
 
 import base.Node.Complete
 import base.memory.Memory
-import base.processor.command.CommandPostNodeProcessorImpl
-import base.processor.template.TemplatePostNodeProcessorImpl
 import base.regex.RegexPattern
 import parser.json.Category
 import parser.json.Knowledge
@@ -131,9 +129,7 @@ object DefaultNodeManagerBuilder {
 
         return DefaultNodeManager(
             nodes,
-            memory,
-            TemplatePostNodeProcessorImpl(memory),
-            CommandPostNodeProcessorImpl(memory)
+            memory
         )
     }
 }

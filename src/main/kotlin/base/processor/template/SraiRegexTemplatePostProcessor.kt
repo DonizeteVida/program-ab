@@ -1,8 +1,9 @@
 package base.processor.template
 
 import base.memory.Memory
-import base.regex.RegexPattern
 import base.memory.Stack
+import base.processor.NodeProcessor
+import base.regex.RegexPattern
 
 class SraiRegexTemplatePostProcessor(
     private val stack: Stack,
@@ -14,8 +15,8 @@ class SraiRegexTemplatePostProcessor(
 
     override fun onFinish(builder: StringBuilder, matchCounter: Int) =
         if (matchCounter > 0) {
-            TemplatePostProcessor.Result.Rerun(builder.toString())
+            NodeProcessor.Action.ReRun(builder.toString())
         } else {
-            TemplatePostProcessor.Result.Success
+            NodeProcessor.Action.Success(builder.toString())
         }
 }
